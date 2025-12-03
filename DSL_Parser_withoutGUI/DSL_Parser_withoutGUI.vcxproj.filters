@@ -18,9 +18,49 @@
     <ClCompile Include="源.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="antlr4\project\EcoBotCpp\EcoBotBaseVisitor.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="antlr4\project\EcoBotCpp\EcoBotVisitor.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="antlr4\project\EcoBotCpp\EcoBotLexer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="antlr4\project\EcoBotCpp\EcoBotListener.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="antlr4\project\EcoBotCpp\EcoBotParser.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="DSL_script\normal.dsl" />
     <None Include="DSL_script\onlyintent.dsl" />
+    <None Include="antlr4\project\EcoBot.g4" />
+    <None Include="antlr4\project\EcoBotCpp\EcoBot.tokens" />
+    <None Include="antlr4\project\EcoBotCpp\EcoBot.interp" />
+    <None Include="antlr4\project\EcoBotCpp\EcoBotLexer.interp" />
+    <None Include="antlr4\project\EcoBotCpp\EcoBotLexer.tokens" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="antlr4\project\instruction.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="antlr4\project\EcoBotCpp\EcoBotBaseVisitor.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="antlr4\project\EcoBotCpp\EcoBotVisitor.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="antlr4\project\EcoBotCpp\EcoBotLexer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="antlr4\project\EcoBotCpp\EcoBotListener.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="antlr4\project\EcoBotCpp\EcoBotParser.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

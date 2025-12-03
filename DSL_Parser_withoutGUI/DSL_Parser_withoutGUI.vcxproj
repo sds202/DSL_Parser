@@ -108,10 +108,13 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdclatest</LanguageStandard_C>
       <BuildStlModules>true</BuildStlModules>
+      <AdditionalIncludeDirectories>E:\Data-VS-projects\DSL_Parser\antlr4-cpp-runtime-4.13.2-source\runtime\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>E:\Data-VS-projects\DSL_Parser\antlr4-cpp-runtime-4.13.2-source\demo\Windows\bin\vs-2022\x64\Debug DLL;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>antlr4-runtime.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -130,11 +133,31 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="antlr4\project\EcoBotCpp\EcoBotBaseVisitor.cpp" />
+    <ClCompile Include="antlr4\project\EcoBotCpp\EcoBotLexer.cpp" />
+    <ClCompile Include="antlr4\project\EcoBotCpp\EcoBotListener.cpp" />
+    <ClCompile Include="antlr4\project\EcoBotCpp\EcoBotParser.cpp" />
+    <ClCompile Include="antlr4\project\EcoBotCpp\EcoBotVisitor.cpp" />
     <ClCompile Include="源.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="antlr4\project\EcoBot.g4" />
+    <None Include="antlr4\project\EcoBotCpp\EcoBot.interp" />
+    <None Include="antlr4\project\EcoBotCpp\EcoBot.tokens" />
+    <None Include="antlr4\project\EcoBotCpp\EcoBotLexer.interp" />
+    <None Include="antlr4\project\EcoBotCpp\EcoBotLexer.tokens" />
     <None Include="DSL_script\normal.dsl" />
     <None Include="DSL_script\onlyintent.dsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="antlr4\project\instruction.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="antlr4\project\EcoBotCpp\EcoBotBaseVisitor.h" />
+    <ClInclude Include="antlr4\project\EcoBotCpp\EcoBotLexer.h" />
+    <ClInclude Include="antlr4\project\EcoBotCpp\EcoBotListener.h" />
+    <ClInclude Include="antlr4\project\EcoBotCpp\EcoBotParser.h" />
+    <ClInclude Include="antlr4\project\EcoBotCpp\EcoBotVisitor.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
