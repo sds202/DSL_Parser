@@ -3,6 +3,7 @@
 
 
 #include "EcoBotListener.h"
+#include "EcoBotVisitor.h"
 
 #include "EcoBotParser.h"
 
@@ -186,6 +187,14 @@ void EcoBotParser::ProgramContext::exitRule(tree::ParseTreeListener *listener) {
     parserListener->exitProgram(this);
 }
 
+
+std::any EcoBotParser::ProgramContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<EcoBotVisitor*>(visitor))
+    return parserVisitor->visitProgram(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 EcoBotParser::ProgramContext* EcoBotParser::program() {
   ProgramContext *_localctx = _tracker.createInstance<ProgramContext>(_ctx, getState());
   enterRule(_localctx, 0, EcoBotParser::RuleProgram);
@@ -258,6 +267,14 @@ void EcoBotParser::IntentDefContext::exitRule(tree::ParseTreeListener *listener)
     parserListener->exitIntentDef(this);
 }
 
+
+std::any EcoBotParser::IntentDefContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<EcoBotVisitor*>(visitor))
+    return parserVisitor->visitIntentDef(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 EcoBotParser::IntentDefContext* EcoBotParser::intentDef() {
   IntentDefContext *_localctx = _tracker.createInstance<IntentDefContext>(_ctx, getState());
   enterRule(_localctx, 2, EcoBotParser::RuleIntentDef);
@@ -321,6 +338,14 @@ void EcoBotParser::StmtListContext::exitRule(tree::ParseTreeListener *listener) 
   auto parserListener = dynamic_cast<EcoBotListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitStmtList(this);
+}
+
+
+std::any EcoBotParser::StmtListContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<EcoBotVisitor*>(visitor))
+    return parserVisitor->visitStmtList(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 EcoBotParser::StmtListContext* EcoBotParser::stmtList() {
@@ -400,6 +425,14 @@ void EcoBotParser::StmtContext::exitRule(tree::ParseTreeListener *listener) {
   auto parserListener = dynamic_cast<EcoBotListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitStmt(this);
+}
+
+
+std::any EcoBotParser::StmtContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<EcoBotVisitor*>(visitor))
+    return parserVisitor->visitStmt(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 EcoBotParser::StmtContext* EcoBotParser::stmt() {
@@ -498,6 +531,14 @@ void EcoBotParser::ReplyStmtContext::exitRule(tree::ParseTreeListener *listener)
     parserListener->exitReplyStmt(this);
 }
 
+
+std::any EcoBotParser::ReplyStmtContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<EcoBotVisitor*>(visitor))
+    return parserVisitor->visitReplyStmt(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 EcoBotParser::ReplyStmtContext* EcoBotParser::replyStmt() {
   ReplyStmtContext *_localctx = _tracker.createInstance<ReplyStmtContext>(_ctx, getState());
   enterRule(_localctx, 8, EcoBotParser::RuleReplyStmt);
@@ -561,6 +602,14 @@ void EcoBotParser::RequireStmtContext::exitRule(tree::ParseTreeListener *listene
   auto parserListener = dynamic_cast<EcoBotListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitRequireStmt(this);
+}
+
+
+std::any EcoBotParser::RequireStmtContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<EcoBotVisitor*>(visitor))
+    return parserVisitor->visitRequireStmt(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 EcoBotParser::RequireStmtContext* EcoBotParser::requireStmt() {
@@ -628,6 +677,14 @@ void EcoBotParser::CallStmtContext::exitRule(tree::ParseTreeListener *listener) 
   auto parserListener = dynamic_cast<EcoBotListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitCallStmt(this);
+}
+
+
+std::any EcoBotParser::CallStmtContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<EcoBotVisitor*>(visitor))
+    return parserVisitor->visitCallStmt(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 EcoBotParser::CallStmtContext* EcoBotParser::callStmt() {
@@ -704,6 +761,14 @@ void EcoBotParser::ServiceCallContext::exitRule(tree::ParseTreeListener *listene
   auto parserListener = dynamic_cast<EcoBotListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitServiceCall(this);
+}
+
+
+std::any EcoBotParser::ServiceCallContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<EcoBotVisitor*>(visitor))
+    return parserVisitor->visitServiceCall(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 EcoBotParser::ServiceCallContext* EcoBotParser::serviceCall() {
@@ -804,6 +869,14 @@ void EcoBotParser::IfStmtContext::exitRule(tree::ParseTreeListener *listener) {
     parserListener->exitIfStmt(this);
 }
 
+
+std::any EcoBotParser::IfStmtContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<EcoBotVisitor*>(visitor))
+    return parserVisitor->visitIfStmt(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 EcoBotParser::IfStmtContext* EcoBotParser::ifStmt() {
   IfStmtContext *_localctx = _tracker.createInstance<IfStmtContext>(_ctx, getState());
   enterRule(_localctx, 16, EcoBotParser::RuleIfStmt);
@@ -899,6 +972,14 @@ void EcoBotParser::ExitStmtContext::exitRule(tree::ParseTreeListener *listener) 
     parserListener->exitExitStmt(this);
 }
 
+
+std::any EcoBotParser::ExitStmtContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<EcoBotVisitor*>(visitor))
+    return parserVisitor->visitExitStmt(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 EcoBotParser::ExitStmtContext* EcoBotParser::exitStmt() {
   ExitStmtContext *_localctx = _tracker.createInstance<ExitStmtContext>(_ctx, getState());
   enterRule(_localctx, 18, EcoBotParser::RuleExitStmt);
@@ -952,6 +1033,14 @@ void EcoBotParser::BlockContext::exitRule(tree::ParseTreeListener *listener) {
   auto parserListener = dynamic_cast<EcoBotListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitBlock(this);
+}
+
+
+std::any EcoBotParser::BlockContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<EcoBotVisitor*>(visitor))
+    return parserVisitor->visitBlock(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 EcoBotParser::BlockContext* EcoBotParser::block() {
@@ -1013,6 +1102,14 @@ void EcoBotParser::ConditionContext::exitRule(tree::ParseTreeListener *listener)
   auto parserListener = dynamic_cast<EcoBotListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitCondition(this);
+}
+
+
+std::any EcoBotParser::ConditionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<EcoBotVisitor*>(visitor))
+    return parserVisitor->visitCondition(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 EcoBotParser::ConditionContext* EcoBotParser::condition() {
@@ -1086,6 +1183,14 @@ void EcoBotParser::ValueContext::exitRule(tree::ParseTreeListener *listener) {
     parserListener->exitValue(this);
 }
 
+
+std::any EcoBotParser::ValueContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<EcoBotVisitor*>(visitor))
+    return parserVisitor->visitValue(this);
+  else
+    return visitor->visitChildren(this);
+}
+
 EcoBotParser::ValueContext* EcoBotParser::value() {
   ValueContext *_localctx = _tracker.createInstance<ValueContext>(_ctx, getState());
   enterRule(_localctx, 24, EcoBotParser::RuleValue);
@@ -1151,6 +1256,14 @@ void EcoBotParser::ArgListContext::exitRule(tree::ParseTreeListener *listener) {
   auto parserListener = dynamic_cast<EcoBotListener *>(listener);
   if (parserListener != nullptr)
     parserListener->exitArgList(this);
+}
+
+
+std::any EcoBotParser::ArgListContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<EcoBotVisitor*>(visitor))
+    return parserVisitor->visitArgList(this);
+  else
+    return visitor->visitChildren(this);
 }
 
 EcoBotParser::ArgListContext* EcoBotParser::argList() {
