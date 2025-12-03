@@ -15,11 +15,12 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="源.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="dsl.txt" />
+    <None Include="DSL_script\normal.dsl" />
+    <None Include="DSL_script\onlyintent.dsl" />
   </ItemGroup>
 </Project>

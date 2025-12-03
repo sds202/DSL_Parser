@@ -3,5 +3,6 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="DSL_Parser/DSL_Parser.vcxproj" />
+  <Project Path="DSL_Parser/DSL_Parser.vcxproj" Id="e09dfaf8-c358-40bd-9b52-bdf3198a42d1" />
+  <Project Path="DSL_Parser_withoutGUI/DSL_Parser_withoutGUI.vcxproj" Id="7e1147ce-a179-443b-9e71-3d1d4255c029" />
 </Solution>
