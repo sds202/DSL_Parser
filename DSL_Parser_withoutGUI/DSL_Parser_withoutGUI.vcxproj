@@ -109,6 +109,7 @@
       <LanguageStandard_C>stdclatest</LanguageStandard_C>
       <BuildStlModules>true</BuildStlModules>
       <AdditionalIncludeDirectories>E:\Data-VS-projects\DSL_Parser\antlr4-cpp-runtime-4.13.2-source\runtime\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -138,6 +139,8 @@
     <ClCompile Include="antlr4\project\EcoBotCpp\EcoBotListener.cpp" />
     <ClCompile Include="antlr4\project\EcoBotCpp\EcoBotParser.cpp" />
     <ClCompile Include="antlr4\project\EcoBotCpp\EcoBotVisitor.cpp" />
+    <ClCompile Include="antlr4\project\EcoBotCpp\EcoBotInterpreter.ixx" />
+    <ClCompile Include="antlr4\project\EcoBotCpp\Module.ixx" />
     <ClCompile Include="源.cpp" />
   </ItemGroup>
   <ItemGroup>

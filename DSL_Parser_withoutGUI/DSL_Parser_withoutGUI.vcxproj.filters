@@ -33,6 +33,12 @@
     <ClCompile Include="antlr4\project\EcoBotCpp\EcoBotParser.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="antlr4\project\EcoBotCpp\EcoBotInterpreter.ixx">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="antlr4\project\EcoBotCpp\Module.ixx">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="DSL_script\normal.dsl" />
