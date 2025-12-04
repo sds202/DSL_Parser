@@ -4,15 +4,8 @@
 
 export module something;
 import EcoBotInterpreter;
-
-std::string mockNLU(std::string input)
-{
-	if (input.find("单") != std::string::npos)
-		return "QUERY_ORDER";
-	if (input.find("退") != std::string::npos)
-		return "REFUND";
-	return "GREET";
-}
+import IntentRecognition;
+import Context;
 
 export void Maybe()
 {
@@ -28,7 +21,10 @@ export void Maybe()
 		EcoBotParser::ProgramContext* tree{ parser.program() };
 		std::cout << "脚本加载完成" << std::endl;
 
-		EcoBotInterpreter interpreter;
+		Context ctx;
+		ctx.add("name", "sb");
+
+		EcoBotInterpreter interpreter(ctx);
 
 
 		std::string userInput;

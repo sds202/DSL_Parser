@@ -1,0 +1,5 @@
+javac -cp ".;E:\__ANTLR\antlr-4.13.2-complete.jar" -d output *.java
+
+
+
+Get-Content input.txt | java -cp "output;E:\__ANTLR\antlr-4.13.2-complete.jar" org.antlr.v4.gui.TestRig Expr prog -gui
