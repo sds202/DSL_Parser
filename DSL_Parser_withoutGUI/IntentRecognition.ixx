@@ -30,7 +30,7 @@ export std::string llmNLU(std::string_view input)
 	cli.set_bearer_token_auth(API_KEY);
 
 	nlohmann::json requestBody = {
-		{"model", "glm-4.6"}, 
+		{"model", "glm-4.5"}, 
 		{"messages", {
 			{
 				{"role", "system"},
@@ -40,6 +40,9 @@ export std::string llmNLU(std::string_view input)
 				{"role", "user"},
 				{"content", input}     
 			}
+		}},
+		{"thinking",{
+			{"type","disabled"}
 		}},
 		{"temperature", 0.1}, 
 		{"stream", false}     
