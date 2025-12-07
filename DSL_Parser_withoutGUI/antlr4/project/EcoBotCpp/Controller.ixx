@@ -35,8 +35,8 @@ export void running()
 				break;
 
 
-			std::string targetIntent = mockNLU(userInput);
-			std::cout << "(Debug: 识别意图为 " << targetIntent << ")" << std::endl;
+			std::string targetIntent = llmNLU(userInput);
+			//std::cout << "(Debug: 识别意图为 " << targetIntent << ")" << std::endl;
 
 			EcoBotParser::IntentDefContext* targetNode{ nullptr };
 

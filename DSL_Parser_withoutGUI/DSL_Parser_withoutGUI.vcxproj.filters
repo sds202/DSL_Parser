@@ -80,5 +80,11 @@
     <ClInclude Include="antlr4\project\EcoBotCpp\EcoBotParser.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="httplib.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="json.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
