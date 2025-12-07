@@ -8,7 +8,7 @@ private:
 public:
 	void add(std::string key, std::string value);
 	bool contains(std::string key);
-	std::string find(std::string key);
+	std::optional<std::string> find(std::string key);
 
 };
 
@@ -21,7 +21,11 @@ bool Context::contains(std::string key)
 {
 	return memory.contains(key);
 }
-std::string Context::find(std::string key)
+std::optional<std::string> Context::find(std::string key)
 {
-	return memory.find(key)->second;
+	auto it{ memory.find(key) };
+	if (it != memory.end()) {
+		return it->second;
+	}
+	return std::nullopt;
 }

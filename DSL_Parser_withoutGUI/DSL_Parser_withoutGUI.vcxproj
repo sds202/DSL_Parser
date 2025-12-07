@@ -140,9 +140,11 @@
     <ClCompile Include="antlr4\project\EcoBotCpp\EcoBotParser.cpp" />
     <ClCompile Include="antlr4\project\EcoBotCpp\EcoBotVisitor.cpp" />
     <ClCompile Include="antlr4\project\EcoBotCpp\EcoBotInterpreter.ixx" />
-    <ClCompile Include="antlr4\project\EcoBotCpp\Module.ixx" />
+    <ClCompile Include="antlr4\project\EcoBotCpp\Controller.ixx" />
     <ClCompile Include="IntentRecognition.ixx" />
     <ClCompile Include="Context.ixx" />
+    <ClCompile Include="DAO.ixx" />
+    <ClCompile Include="DBService.ixx" />
     <ClCompile Include="源.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -2,12 +2,12 @@
 #include "EcoBotParser.h"
 #include "EcoBotLexer.h"
 
-export module something;
+export module Controller;
 import EcoBotInterpreter;
 import IntentRecognition;
 import Context;
 
-export void Maybe()
+export void running()
 {
 	std::ifstream stream("./DSL_script/onlyintent.dsl");
 	if (!stream)
@@ -33,6 +33,7 @@ export void Maybe()
 			std::getline(std::cin, userInput);
 			if (userInput == "exit")
 				break;
+
 
 			std::string targetIntent = mockNLU(userInput);
 			std::cout << "(Debug: 识别意图为 " << targetIntent << ")" << std::endl;

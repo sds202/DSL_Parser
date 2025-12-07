@@ -12,7 +12,7 @@ intent QUERY_ORDER {
     } else if (status == "DELIVERED") {
         reply "您的订单 ${order_id} 已签收。";
     } else {
-        reply "当前状态：${status}。";
+        reply "当前状态?";
     }
 }
 
@@ -25,8 +25,6 @@ intent REFUND {
     if (result == "SUCCESS") {
         reply "退款申请已提交。";
     } else {
-        reply "申请失败，转人工。";
-        call Service.transferToHuman();
-        exit;
+        reply "申请失败。";
     }
 }

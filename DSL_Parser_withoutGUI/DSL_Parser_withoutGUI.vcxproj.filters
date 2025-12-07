@@ -36,13 +36,19 @@
     <ClCompile Include="antlr4\project\EcoBotCpp\EcoBotInterpreter.ixx">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="antlr4\project\EcoBotCpp\Module.ixx">
+    <ClCompile Include="antlr4\project\EcoBotCpp\Controller.ixx">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="IntentRecognition.ixx">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Context.ixx">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="DAO.ixx">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="DBService.ixx">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
