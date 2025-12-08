@@ -1,3 +1,5 @@
+module;
+
 export module DataAccessObject;
 import std;
 

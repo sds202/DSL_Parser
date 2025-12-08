@@ -1,7 +1,8 @@
+module;
+
 export module DBService;
-import DataAccessObject;
-import Context;
 import std;
+import DataAccessObject;
 
 export std::string dispatchService(std::string_view serviceName, std::string_view methodName,const std::vector<std::string>& args);
 

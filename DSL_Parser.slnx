@@ -5,4 +5,5 @@
   </Configurations>
   <Project Path="DSL_Parser/DSL_Parser.vcxproj" Id="e09dfaf8-c358-40bd-9b52-bdf3198a42d1" />
   <Project Path="DSL_Parser_withoutGUI/DSL_Parser_withoutGUI.vcxproj" Id="7e1147ce-a179-443b-9e71-3d1d4255c029" />
+  <Project Path="web_try/web_try.vcxproj" Id="b6aabf30-0b2d-4315-a377-53d130ce32b7" />
 </Solution>

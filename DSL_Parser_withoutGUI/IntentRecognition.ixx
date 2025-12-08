@@ -4,7 +4,6 @@
 #include"json.hpp"
 
 export module IntentRecognition;
-import std;
 
 const std::string API_KEY{ "5280be8dae0f45afb0c9f8fd53ba7c2d.JchavmZVZYL0rMhE" };
 const std::string API_HOST{ "open.bigmodel.cn" };

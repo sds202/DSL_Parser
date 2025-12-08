@@ -112,14 +112,14 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <LanguageStandard_C>stdclatest</LanguageStandard_C>
       <BuildStlModules>true</BuildStlModules>
-      <AdditionalIncludeDirectories>E:\Data-VS-projects\DSL_Parser\antlr4-cpp-runtime-4.13.2-source\runtime\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>E:\_Portable_vcpkg\vcpkg\installed\x64-windows\include;E:\Data-VS-projects\DSL_Parser\antlr4-cpp-runtime-4.13.2-source\runtime\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>E:\Data-VS-projects\DSL_Parser\antlr4-cpp-runtime-4.13.2-source\demo\Windows\bin\vs-2022\x64\Debug DLL;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>antlr4-runtime.lib;libssl.lib;libcrypto.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>E:\_Portable_vcpkg\vcpkg\installed\x64-windows\debug\lib;E:\Data-VS-projects\DSL_Parser\antlr4-cpp-runtime-4.13.2-source\demo\Windows\bin\vs-2022\x64\Debug DLL;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>drogon.lib;trantor.lib;jsoncpp.lib;zlibd.lib;ws2_32.lib;Crypt32.lib;Advapi32.lib;User32.lib;antlr4-runtime.lib;libssl.lib;libcrypto.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
