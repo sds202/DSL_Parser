@@ -5,23 +5,32 @@
 import std;
 import Controller;
 
-using namespace drogon;
+drogon::Task<drogon::HttpResponsePtr> hello(drogon::HttpRequestPtr req)
+{
+    auto resp{ drogon::HttpResponse::newHttpResponse() };
+    std::string user_input(req->getBody());
+    std::string result = web_running(user_input); 
+    resp->setBody(result);
+    co_return resp;
+}
 
 int main()
 {
 	SetConsoleOutputCP(65001);
 	SetConsoleCP(CP_UTF8);
-	//running();
 
-    app().registerHandler("/", [](const HttpRequestPtr& req,
-        std::function<void(const HttpResponsePtr&)>&& callback) {
-            auto resp = HttpResponse::newHttpResponse();
-            resp->setBody("Hello, Drogon on Windows!");
-            callback(resp);
-        });
+    initDSL("./DSL_script/onlyintent.dsl");
 
-    app().addListener("0.0.0.0", 8080);
+    drogon::app().registerHandler(
+        "/",
+        [](drogon::HttpRequestPtr req) -> drogon::Task<drogon::HttpResponsePtr> {
+            return hello(req);
+        },
+        { drogon::Post }
+    );
 
-    app().run();
+    drogon::app().addListener("0.0.0.0", 8080);
+
+    drogon::app().run();
     return 0;
 }

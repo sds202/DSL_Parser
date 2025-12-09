@@ -7,60 +7,57 @@ import EcoBotInterpreter;
 import IntentRecognition;
 import Context;
 
-export void running()
+struct DSLResources {
+	std::unique_ptr<std::ifstream> fileStream;
+	std::unique_ptr<antlr4::ANTLRInputStream> input;
+	std::unique_ptr<EcoBotLexer> lexer;
+	std::unique_ptr<antlr4::CommonTokenStream> tokens;
+	std::unique_ptr<EcoBotParser> parser;
+	EcoBotParser::ProgramContext* tree = nullptr;
+};
+static DSLResources g_dsl;
+
+export void initDSL(std::string scriptPath)
 {
-	std::ifstream stream("./DSL_script/onlyintent.dsl");
-	if (!stream)
+	g_dsl.fileStream = std::make_unique<std::ifstream>(scriptPath);
+
+	if (!g_dsl.fileStream->is_open()) {
+		std::cerr << "Fatal Error: Cannot open DSL script: " << scriptPath << std::endl;
 		exit(-1);
-	
-	try {
-		antlr4::ANTLRInputStream input(stream);
-		EcoBotLexer lexer(&input);
-		antlr4::CommonTokenStream tokens(&lexer);
-		EcoBotParser parser(&tokens);
-		EcoBotParser::ProgramContext* tree{ parser.program() };
-		std::cout << "脚本加载完成" << std::endl;
+	}
 
-		Context ctx;
-		ctx.add("name", "sb");
+	g_dsl.input = std::make_unique<antlr4::ANTLRInputStream>(*g_dsl.fileStream);
+	g_dsl.lexer = std::make_unique<EcoBotLexer>(g_dsl.input.get());
+	g_dsl.tokens = std::make_unique<antlr4::CommonTokenStream>(g_dsl.lexer.get());
+	g_dsl.parser = std::make_unique<EcoBotParser>(g_dsl.tokens.get());
 
-		EcoBotInterpreter interpreter(ctx);
+	g_dsl.tree = g_dsl.parser->program();
+	std::cout << "脚本加载完成" << std::endl;
+}
 
+export std::string web_running(std::string userInput)
+{
+	Context ctx;
+	ctx.add("name", "sb");
+	EcoBotInterpreter interpreter(ctx);
 
-		std::string userInput;
-		while (true) {
-			std::cout << "\nYou: ";
-			std::getline(std::cin, userInput);
-			if (userInput == "exit")
-				break;
+	std::string targetIntent = llmNLU(userInput);
+	std::cout << "(Debug: 识别意图为 " << targetIntent << ")" << std::endl;
 
+	EcoBotParser::IntentDefContext* targetNode{ nullptr };
 
-			std::string targetIntent = llmNLU(userInput);
-			//std::cout << "(Debug: 识别意图为 " << targetIntent << ")" << std::endl;
-
-			EcoBotParser::IntentDefContext* targetNode{ nullptr };
-
-			for (auto* intentCtx : tree->intentDef()) {
-				if (intentCtx->ID()->getText() == targetIntent) {
-					targetNode = intentCtx;
-					break;
-				}
-			}
-
-			if (targetNode) {
-				interpreter.visit(targetNode);
-			}
-			else {
-				std::cout << "Robot: 我不知道该怎么处理这个意图 (" << targetIntent << ")" << std::endl;
-			}
+	for (auto* intentCtx : g_dsl.tree->intentDef()) {
+		if (intentCtx->ID()->getText() == targetIntent) {
+			targetNode = intentCtx;
+			break;
 		}
 	}
-	catch(const std::exception& e){
-		std::cerr << "未知错误：在处理文件 '"  << "' 时发生异常 - " << e.what() << std::endl;
-		exit(-1);
+
+	if (targetNode) {
+		interpreter.visit(targetNode);
+		return interpreter.getOutput();
 	}
-
-
-
-
+	else {
+		return "我不知道该怎么处理这个意图";
+	}
 }

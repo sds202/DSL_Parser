@@ -8,6 +8,7 @@ import DBService;
 export class  EcoBotInterpreter : public EcoBotBaseVisitor {
 public:
     EcoBotInterpreter(Context& context);
+    std::string getOutput();
     virtual std::any visitReplyStmt(EcoBotParser::ReplyStmtContext* ctx) override;
     virtual std::any visitRequireStmt(EcoBotParser::RequireStmtContext* ctx) override;
     virtual std::any visitIfStmt(EcoBotParser::IfStmtContext* ctx) override;
@@ -17,7 +18,7 @@ public:
 private:
     Context &userCtx;
     void handleEscapeSeq(std::string& text);
-
+    std::stringstream output;
 
 };
 
@@ -28,6 +29,10 @@ EcoBotInterpreter::EcoBotInterpreter(Context& context)
 
 }
 
+std::string EcoBotInterpreter::getOutput()
+{
+    return output.str();
+}
 
 void EcoBotInterpreter::handleEscapeSeq(std::string& text) {
 
@@ -66,9 +71,8 @@ std::any EcoBotInterpreter::visitReplyStmt(EcoBotParser::ReplyStmtContext* ctx) 
 
     handleEscapeSeq(text);
 
-    //std::cout << "Robot: " << text << std::endl;
-
-    std::cout << "\033[33mRobot: " << text << "\033[0m" << std::endl;
+    //std::cout << "\033[33mRobot: " << text << "\033[0m" << std::endl;
+    output << text;
 
     return 0;
 }
@@ -78,10 +82,10 @@ std::any EcoBotInterpreter::visitRequireStmt(EcoBotParser::RequireStmtContext* c
     std::string requireValue;
 
     std::string requireText{ ctx->STRING()->getText() };
-    //std::cout << "Robot: " << requireText << std::endl;
-    std::cout << "\033[33mRobot: " << requireText << "\033[0m" << std::endl;
-    
 
+    //std::cout << "\033[33mRobot: " << requireText << "\033[0m" << std::endl;
+    output << requireText;
+    
     std::getline(std::cin, requireValue);
 
     userCtx.add(requireKey, requireValue);
