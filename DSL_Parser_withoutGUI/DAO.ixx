@@ -3,6 +3,8 @@ module;
 export module DataAccessObject;
 import std;
 
+//interface
+
 export class OrderDAO
 {
 public:
@@ -10,6 +12,13 @@ public:
 	std::string applyRefund(std::string_view orderID, std::string_view reason);
 };
 
+export class UserDAO
+{
+public:
+	std::string getName(std::string_view userID);
+};
+
+//implementations
 
 std::string OrderDAO::getStatus(std::string_view orderID)
 {
@@ -24,11 +33,10 @@ std::string OrderDAO::getStatus(std::string_view orderID)
 		return "DELIVERED";
 		break;
 	case 2:
-		return "?";
+		return "NONE";
 		break;
 	}
 }
-
 std::string OrderDAO::applyRefund(std::string_view orderID, std::string_view reason)
 {
 	//std::cout << "orderid:" << orderID << "\n";
@@ -42,4 +50,9 @@ std::string OrderDAO::applyRefund(std::string_view orderID, std::string_view rea
 		return "Fail";
 		break;
 	}
+}
+
+std::string UserDAO::getName(std::string_view userID)
+{
+	return "user_"+std::string(userID);
 }

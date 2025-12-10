@@ -1,4 +1,5 @@
 intent GREET {
+    name = call UserService.getName(user_id);
     reply "尊敬的 ${name}，您好。请问您有什么需求？";
 }
 
@@ -12,7 +13,7 @@ intent QUERY_ORDER {
     } else if (status == "DELIVERED") {
         reply "您的订单 ${order_id} 已签收。";
     } else {
-        reply "当前状态?";
+        reply "未查询到该订单";
     }
 }
 

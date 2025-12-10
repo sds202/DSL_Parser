@@ -5,6 +5,20 @@ export module EcoBotInterpreter;
 import Context;
 import DBService;
 
+export class MissingSlotException :public std::exception
+{
+public:
+    std::string varName;
+    
+    MissingSlotException(std::string name)
+        :varName(name) {
+    }
+
+    const char* what() const noexcept override {
+        return "Interpreter paused: missing slot.";
+    }
+};
+
 export class  EcoBotInterpreter : public EcoBotBaseVisitor {
 public:
     EcoBotInterpreter(Context& context);
@@ -21,7 +35,6 @@ private:
     std::stringstream output;
 
 };
-
 
 EcoBotInterpreter::EcoBotInterpreter(Context& context)
     :userCtx(context)
@@ -81,18 +94,14 @@ std::any EcoBotInterpreter::visitRequireStmt(EcoBotParser::RequireStmtContext* c
     std::string requireKey{ ctx->ID()->getText() };
     std::string requireValue;
 
-    std::string requireText{ ctx->STRING()->getText() };
-
-    //std::cout << "\033[33mRobot: " << requireText << "\033[0m" << std::endl;
-    output << requireText;
-    
-    std::getline(std::cin, requireValue);
-
-    userCtx.add(requireKey, requireValue);
+    if (!userCtx.find(requireKey)) {
+        std::string requireText{ ctx->STRING()->getText() };
+        output << requireText;
+        throw MissingSlotException(requireKey);
+    }
 
     return 0;
 }
-
 std::any EcoBotInterpreter::visitIfStmt(EcoBotParser::IfStmtContext* ctx)
 {
 
@@ -117,7 +126,6 @@ std::any EcoBotInterpreter::visitIfStmt(EcoBotParser::IfStmtContext* ctx)
         return 0;
     }
 }
-
 std::any EcoBotInterpreter::visitCondition(EcoBotParser::ConditionContext* ctx)
 {
     std::string lID{ ctx->ID()->getText() };
@@ -140,7 +148,6 @@ std::any EcoBotInterpreter::visitCondition(EcoBotParser::ConditionContext* ctx)
         }
     }
 }
-
 std::any EcoBotInterpreter::visitCallStmt(EcoBotParser::CallStmtContext* ctx)
 {
     auto serviceCtx{ ctx->serviceCall() };
@@ -164,7 +171,6 @@ std::any EcoBotInterpreter::visitCallStmt(EcoBotParser::CallStmtContext* ctx)
     userCtx.add(ctx->ID()->getText(), result);
     
 }
-
 std::any EcoBotInterpreter::visitArgList(EcoBotParser::ArgListContext* ctx)
 {
     std::vector<std::string> args;
@@ -173,3 +179,4 @@ std::any EcoBotInterpreter::visitArgList(EcoBotParser::ArgListContext* ctx)
     }
     return args;
 }
+
