@@ -1,5 +1,9 @@
+java:
+
 javac -cp ".;E:\__ANTLR\antlr-4.13.2-complete.jar" -d output *.java
-
-
-
 Get-Content input.txt | java -cp "output;E:\__ANTLR\antlr-4.13.2-complete.jar" org.antlr.v4.gui.TestRig Expr prog -gui
+
+
+cpp:
+
+java -jar E:\__ANTLR\antlr-4.13.2-complete.jar -Dlanguage=Cpp EcoBot.g4 -o generated_cpp

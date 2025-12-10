@@ -1,4 +1,4 @@
-#define WIN32_LEAN_AND_MEAN 
+ï»¿#define WIN32_LEAN_AND_MEAN 
 #include<Windows.h>
 #include <drogon/drogon.h>
 
@@ -26,7 +26,7 @@ drogon::Task<drogon::HttpResponsePtr> Configure(drogon::HttpRequestPtr req)
         co_return resp;
     }
 
-    LOG_INFO << "¹ÜÀíÔ±ÕýÔÚÇëÇóÇÐ»» DSL ÖÁ: " << newDslPath;
+    LOG_INFO << "ç®¡ç†å‘˜æ­£åœ¨è¯·æ±‚åˆ‡æ¢ DSL è‡³: " << newDslPath;
 
     bool success = initOrReloadDSL(newDslPath);
 
