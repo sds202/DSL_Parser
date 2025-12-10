@@ -47,7 +47,7 @@ int main()
 	SetConsoleOutputCP(65001);
 	SetConsoleCP(CP_UTF8);
 
-    initOrReloadDSL("./DSL_script/onlyintent.dsl");
+    initOrReloadDSL("./DSL_script/test2.dsl");
 
     drogon::app().registerHandler(
         "/",

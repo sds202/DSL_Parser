@@ -96,6 +96,7 @@ std::any EcoBotInterpreter::visitRequireStmt(EcoBotParser::RequireStmtContext* c
 
     if (!userCtx.find(requireKey)) {
         std::string requireText{ ctx->STRING()->getText() };
+        requireText = requireText.substr(1, requireText.length() - 2);
         output << requireText;
         throw MissingSlotException(requireKey);
     }
@@ -130,23 +131,54 @@ std::any EcoBotInterpreter::visitCondition(EcoBotParser::ConditionContext* ctx)
 {
     std::string lID{ ctx->ID()->getText() };
     std::string op{ ctx->op->getText() };
-    std::string valueStr;
 
-    if (ctx->value()->ID()) {
-        return true; // TODO
-    }
-    else {
-        valueStr = ctx->value()->STRING()->getText();
-        std::string rValue{ valueStr.substr(1,valueStr.length() - 2) };
-        auto lValue{ userCtx.find(lID) };
+    auto lValueOpt{ userCtx.find(lID) };
+    if (!lValueOpt) return false;
+    std::string lStr = lValueOpt.value();
 
-        if (lValue && lValue == rValue) {
-            return true;
+    if (ctx->value()->NUM()) {
+        try {
+            int lInt = std::stoi(lStr); 
+            int rInt = std::stoi(ctx->value()->NUM()->getText());
+
+            if (op == "==") return lInt == rInt;
+            if (op == "!=") return lInt != rInt;
+            if (op == ">")  return lInt > rInt;
+            if (op == "<")  return lInt < rInt;
         }
-        else {
-            return false;
+        catch (...) {
+            return false; 
         }
     }
+    else if (ctx->value()->STRING()) {
+        std::string rawR = ctx->value()->STRING()->getText();
+        std::string rStr = rawR.substr(1, rawR.length() - 2);
+
+        if (op == "==") return lStr == rStr;
+        if (op == "!=") return lStr != rStr;
+        if (op == ">") return lStr > rStr;
+        if (op == "<") return lStr < rStr;
+    }
+    else if (ctx->value()->ID()) {
+        std::string rID = ctx->value()->ID()->getText();
+        auto rValueOpt = userCtx.find(rID);
+        if (!rValueOpt) return false;
+        std::string rStr = rValueOpt.value();
+        try {
+            int lInt = std::stoi(lStr);
+            int rInt = std::stoi(rStr);
+            if (op == "==") return lInt == rInt;
+            if (op == "!=") return lInt != rInt;
+            if (op == ">")  return lInt > rInt;
+            if (op == "<")  return lInt < rInt;
+        }
+        catch (...) {
+            if (op == "==") return lStr == rStr;
+            if (op == "!=") return lStr != rStr;
+        }
+    }
+
+    return false;
 }
 std::any EcoBotInterpreter::visitCallStmt(EcoBotParser::CallStmtContext* ctx)
 {
@@ -174,9 +206,12 @@ std::any EcoBotInterpreter::visitCallStmt(EcoBotParser::CallStmtContext* ctx)
 std::any EcoBotInterpreter::visitArgList(EcoBotParser::ArgListContext* ctx)
 {
     std::vector<std::string> args;
-    for (auto id : ctx->ID()) {
-        args.push_back(id->getText());
+    if (ctx) {
+        for (auto id : ctx->ID()) {
+            args.push_back(id->getText());
+        }
     }
+
     return args;
 }
 

@@ -158,7 +158,8 @@
     <None Include="antlr4\project\EcoBotCpp\EcoBotLexer.interp" />
     <None Include="antlr4\project\EcoBotCpp\EcoBotLexer.tokens" />
     <None Include="DSL_script\normal.dsl" />
-    <None Include="DSL_script\onlyintent.dsl" />
+    <None Include="DSL_script\test1.dsl" />
+    <None Include="DSL_script\test2.dsl" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="antlr4\project\instruction.txt" />

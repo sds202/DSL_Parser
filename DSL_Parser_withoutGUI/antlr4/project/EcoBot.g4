@@ -42,8 +42,8 @@ block: '{' stmtList '}';
 // 条件表达式：var == "value"
 condition: ID op = ('==' | '!=' | '>' | '<') value;
 
-// 值（可以是变量，也可以是字符串字面量）
-value: ID | STRING;
+// 值（可以是变量，也可以是字符串字面量，还可以是数字）
+value: ID | STRING | NUM;
 
 // 参数列表：var1, var2
 argList: ID (',' ID)*;
@@ -64,6 +64,8 @@ ID: [a-zA-Z_] [a-zA-Z0-9_]*;
 
 // 字符串字面量 (String Literal)：支持双引号
 STRING: '"' ( '\\"' | .)*? '"';
+
+NUM: [0]|([1-9][0-9]*);
 
 // 忽略空白字符 (Whitespace) -> skip 表示解析时丢弃
 WS: [ \t\r\n]+ -> skip;
