@@ -5,7 +5,7 @@
 import std;
 import Controller;
 
-drogon::Task<drogon::HttpResponsePtr> hello(drogon::HttpRequestPtr req)
+drogon::Task<drogon::HttpResponsePtr> Chat(drogon::HttpRequestPtr req)
 {
     auto resp{ drogon::HttpResponse::newHttpResponse() };
     std::string user_input(req->getBody());
@@ -14,17 +14,52 @@ drogon::Task<drogon::HttpResponsePtr> hello(drogon::HttpRequestPtr req)
     co_return resp;
 }
 
+drogon::Task<drogon::HttpResponsePtr> Configure(drogon::HttpRequestPtr req)
+{
+    auto resp{ drogon::HttpResponse::newHttpResponse() };
+
+    std::string newDslPath = std::string(req->getBody());
+
+    if (newDslPath.empty()) {
+        resp->setStatusCode(drogon::k400BadRequest);
+        resp->setBody("Error: Wrong path. ");
+        co_return resp;
+    }
+
+    LOG_INFO << "管理员正在请求切换 DSL 至: " << newDslPath;
+
+    bool success = initOrReloadDSL(newDslPath);
+
+    if (success) {
+        resp->setStatusCode(drogon::k200OK);
+        resp->setBody("Success: DSL reloaded. System is running on new logic.");
+    }
+    else {
+        resp->setStatusCode(drogon::k500InternalServerError);
+        resp->setBody("Failed: Syntax error or file not found. System kept old logic.");
+    }
+
+    co_return resp;
+}
+
 int main()
 {
 	SetConsoleOutputCP(65001);
 	SetConsoleCP(CP_UTF8);
 
-    initDSL("./DSL_script/onlyintent.dsl");
+    initOrReloadDSL("./DSL_script/onlyintent.dsl");
 
     drogon::app().registerHandler(
         "/",
         [](drogon::HttpRequestPtr req) -> drogon::Task<drogon::HttpResponsePtr> {
-            return hello(req);
+            return Chat(req);
+        },
+        { drogon::Post }
+    );
+    drogon::app().registerHandler(
+        "/admin",
+        [](drogon::HttpRequestPtr req) -> drogon::Task<drogon::HttpResponsePtr> {
+            return Configure(req);
         },
         { drogon::Post }
     );
