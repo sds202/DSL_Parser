@@ -1,7 +1,7 @@
 ﻿module;
 #include "EcoBotParser.h"
 #include "EcoBotLexer.h"
-#include "trantor/utils/Logger.h"
+#include "drogon/drogon.h"
 
 export module Controller;
 import EcoBotInterpreter;
@@ -22,12 +22,13 @@ struct DSLResources {
 static std::atomic<std::shared_ptr<DSLResources>> g_dsl_ptr;
 
 struct UserSession {
+	std::mutex mtx;
 	Context ctx;
 	std::string lastTimeIntent;
 	std::set<std::string> missingSlot;
 };
-static std::map<std::string, UserSession> g_sessions;
-static std::mutex g_session_mtx;
+static std::map<std::string, std::shared_ptr<UserSession>> g_sessions;
+static std::shared_mutex g_session_mtx;
 
 std::shared_ptr<DSLResources> loadDSLInternal(const std::string& scriptPath)
 {
@@ -83,38 +84,129 @@ export bool initOrReloadDSL(const std::string& scriptPath)
 	}
 }
 
-export std::string web_running(std::string userId,std::string userInput)
+//export std::string web_running(std::string userId,std::string userInput)
+//{
+//	std::shared_ptr<DSLResources> l_dsl_ptr{ g_dsl_ptr.load() };
+//
+//	EcoBotParser::IntentDefContext* targetNode{ nullptr };
+//	std::string finalIntent;
+//
+//	auto [iter, isNew] {g_sessions.try_emplace(userId)};
+//	
+//	UserSession& session{ iter->second };
+//
+//	if (isNew) {
+//		session.ctx.add("user_id", userId);
+//	}
+//
+//	//LLM 识别
+//	initPrompt(l_dsl_ptr->intents, l_dsl_ptr->keywords,session.lastTimeIntent,session.missingSlot);
+//	NLUResult result{ llmNLU(userInput) };
+//	for (const auto& [key, value] : result.entities) {
+//		session.ctx.add(key, value);
+//		LOG_INFO<< "根据LLM识别自动预填槽位: " << key << " = " << value;
+//	}
+//	finalIntent = result.intent;
+//
+//	//判断槽位是否填充
+//	if (!session.missingSlot.empty()) {
+//		for (auto it{ result.entities.begin() }; it != result.entities.end();it++) {
+//			session.missingSlot.erase(it->first);
+//		}
+//	}
+//
+//	//查找意图
+//	for (auto* intentCtx : l_dsl_ptr->tree->intentDef()) {
+//		if (intentCtx->ID()->getText() == finalIntent) {
+//			targetNode = intentCtx;
+//			break;
+//		}
+//	}
+//	if (!targetNode) {
+//		//老实说，这个部分不会用到的，毕竟会返回默认意图
+//		session.lastTimeIntent = "";
+//		return "我不知道该怎么处理这个意图";
+//	}
+//	else {
+//		LOG_INFO<< "最后确定的意图是：" << finalIntent;
+//	}
+//	session.lastTimeIntent = finalIntent;
+//
+//	//真正进入意图并读取回复
+//	EcoBotInterpreter interpreter(session.ctx);
+//	try {
+//		interpreter.visit(targetNode);
+//		session.ctx.clear();
+//
+//	}
+//	catch (const MissingSlotException&e) {
+//		session.missingSlot.insert(e.varName);
+//	}
+//
+//	//最后返回输出
+//	return interpreter.getOutput(); 
+//}
+
+export drogon::Task<std::string> async_web_running(std::string userId, std::string userInput)
 {
 	std::shared_ptr<DSLResources> l_dsl_ptr{ g_dsl_ptr.load() };
+	if (!l_dsl_ptr) 
+		co_return "系统正在初始化，请稍后...";
 
-	EcoBotParser::IntentDefContext* targetNode{ nullptr };
-	std::string finalIntent;
+	//找用户上下文，读锁和写锁；提前拷贝NLU需要的数据
+	std::shared_ptr<UserSession> session{ nullptr };
+	std::string lastIntentCopy;
+	std::set<std::string> missingSlotCopy;
 
-	auto [iter, isNew] {g_sessions.try_emplace(userId)};
-	
-	UserSession& session{ iter->second };
+	{
+		{
+			std::shared_lock<std::shared_mutex> session_lock(g_session_mtx);
+			auto it{ g_sessions.find(userId) };
+			if (it != g_sessions.end()) {
+				session = it->second;
+			}
+		}
+		if (!session) {
+			std::unique_lock<std::shared_mutex>session_write_lock(g_session_mtx);
+			auto it = g_sessions.find(userId);
+			if (it == g_sessions.end()) {
+				session = std::make_shared<UserSession>();
+				session->ctx.add("user_id", userId);
+				g_sessions[userId] = session;
+			}
+			else {
+				session = it->second;
+			}
+		}
 
-	if (isNew) {
-		session.ctx.add("user_id", userId);
+		{
+			std::lock_guard<std::mutex> userLock(session->mtx);
+			lastIntentCopy = session->lastTimeIntent;
+			missingSlotCopy = session->missingSlot;
+		}
+
 	}
 
-	//LLM 识别
-	initPrompt(l_dsl_ptr->intents, l_dsl_ptr->keywords,session.lastTimeIntent,session.missingSlot);
-	NLUResult result{ llmNLU(userInput) };
+	//使用协程，LLM 识别
+	NLUResult result{ co_await llmNLU(userInput,l_dsl_ptr->intents, l_dsl_ptr->keywords, lastIntentCopy, missingSlotCopy) };
+
+	//根据LLM结果 预填槽位，更新意图，更新缺失槽位
+	std::lock_guard<std::mutex> userLock(session->mtx);
+
 	for (const auto& [key, value] : result.entities) {
-		session.ctx.add(key, value);
-		LOG_INFO<< "根据LLM识别自动预填槽位: " << key << " = " << value;
+		session->ctx.add(key, value);
+		LOG_INFO << "根据LLM识别自动预填槽位: " << key << " = " << value;
 	}
-	finalIntent = result.intent;
+	std::string finalIntent{ result.intent };
 
-	//判断槽位是否填充
-	if (!session.missingSlot.empty()) {
-		for (auto it{ result.entities.begin() }; it != result.entities.end();it++) {
-			session.missingSlot.erase(it->first);
+	if (!session->missingSlot.empty()) {
+		for (auto it{ result.entities.begin() }; it != result.entities.end(); it++) {
+			session->missingSlot.erase(it->first);
 		}
 	}
 
 	//查找意图
+	EcoBotParser::IntentDefContext* targetNode{ nullptr };
 	for (auto* intentCtx : l_dsl_ptr->tree->intentDef()) {
 		if (intentCtx->ID()->getText() == finalIntent) {
 			targetNode = intentCtx;
@@ -123,25 +215,25 @@ export std::string web_running(std::string userId,std::string userInput)
 	}
 	if (!targetNode) {
 		//老实说，这个部分不会用到的，毕竟会返回默认意图
-		session.lastTimeIntent = "";
-		return "我不知道该怎么处理这个意图";
+		session->lastTimeIntent = "";
+		co_return "我不知道该怎么处理这个意图";
 	}
 	else {
-		LOG_INFO<< "最后确定的意图是：" << finalIntent;
+		LOG_INFO << "最后确定的意图是：" << finalIntent;
+		session->lastTimeIntent = finalIntent;
 	}
-	session.lastTimeIntent = finalIntent;
 
-	//真正进入意图并读取回复
-	EcoBotInterpreter interpreter(session.ctx);
+	//执行：真正进入意图并读取回复
+	EcoBotInterpreter interpreter(session->ctx);
 	try {
 		interpreter.visit(targetNode);
-		session.ctx.clear();
+		session->ctx.clear();
 
 	}
-	catch (const MissingSlotException&e) {
-		session.missingSlot.insert(e.varName);
+	catch (const MissingSlotException& e) {
+		session->missingSlot.insert(e.varName);
 	}
 
 	//最后返回输出
-	return interpreter.getOutput(); 
+	co_return interpreter.getOutput();
 }

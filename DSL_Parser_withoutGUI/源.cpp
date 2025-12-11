@@ -9,7 +9,7 @@ drogon::Task<drogon::HttpResponsePtr> Chat(drogon::HttpRequestPtr req)
 {
     auto resp{ drogon::HttpResponse::newHttpResponse() };
     std::string user_input(req->getBody());
-    std::string result = web_running("250", user_input);
+    std::string result = co_await async_web_running("250", user_input);
     resp->setBody(result);
     co_return resp;
 }

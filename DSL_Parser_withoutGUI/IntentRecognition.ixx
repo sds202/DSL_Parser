@@ -1,8 +1,6 @@
 ﻿module;
-#define CPPHTTPLIB_OPENSSL_SUPPORT
-#include"httplib.h"
+#include"drogon/drogon.h"
 #include"json.hpp"
-#include "trantor/utils/Logger.h"
 
 export module IntentRecognition;
 
@@ -37,9 +35,7 @@ const std::string SYS_PROMPT_1{
 	})"
 };
 
-static std::string system_prompt;
-
-export void initPrompt(const std::vector<std::string>& intents,const std::vector<std::string>& keywords,std::string_view lastTimeIntent,const std::set<std::string>& missingSlot)
+std::string initPrompt(const std::vector<std::string>& intents,const std::vector<std::string>& keywords,std::string_view lastTimeIntent,const std::set<std::string>& missingSlot)
 {
 	std::stringstream oss;
 
@@ -63,15 +59,19 @@ export void initPrompt(const std::vector<std::string>& intents,const std::vector
 		oss << slot << ' ';
 	}
 
-	system_prompt = oss.str();
+	return oss.str();
 }
 
-export NLUResult llmNLU(std::string_view input)
+export drogon::Task<NLUResult> llmNLU(std::string_view input, const std::vector<std::string>& intents, const std::vector<std::string>& keywords, std::string_view lastTimeIntent, const std::set<std::string>& missingSlot)
 {
-	httplib::SSLClient cli(API_HOST);
+	std::string system_prompt{initPrompt(intents,keywords,lastTimeIntent,missingSlot)};
 
-	cli.set_read_timeout(30, 0);
-	cli.set_bearer_token_auth(API_KEY);
+	auto client{ drogon::HttpClient::newHttpClient(API_HOST) };
+	auto req{ drogon::HttpRequest::newHttpRequest() };
+	req->setMethod(drogon::Post);
+	req->setPath(API_PATH); 
+	req->addHeader("Authorization", "Bearer " + std::string(API_KEY));
+	req->setContentTypeCode(drogon::CT_APPLICATION_JSON);
 
 	nlohmann::json requestBody = {
 		{"model", "glm-4.5"}, 
@@ -92,19 +92,21 @@ export NLUResult llmNLU(std::string_view input)
 		{"stream", false}     
 	};
 
-	auto res = cli.Post(API_PATH, requestBody.dump(), "application/json");
+	req->setBody(requestBody.dump());
 
 	NLUResult result; // 默认是 GREET
 
-	if (res && res->status == 200) {
-		try {
-			auto response = nlohmann::json::parse(res->body);
+	try {
+		auto resp = co_await client->sendRequestCoro(req);
+
+		if (resp->getStatusCode() == 200) {
+			auto response = nlohmann::json::parse(resp->getBody());
+
 
 			if (response.contains("choices") && !response["choices"].empty()) {
 				std::string content = response["choices"][0]["message"]["content"];
 
 				// --- 清洗数据：去除可能存在的 Markdown 标记 ---
-				// 有些模型喜欢返回 ```json ... ```
 				size_t jsonStart = content.find("{");
 				size_t jsonEnd = content.rfind("}");
 				if (jsonStart != std::string::npos && jsonEnd != std::string::npos) {
@@ -113,7 +115,7 @@ export NLUResult llmNLU(std::string_view input)
 				else {
 					// 找不到 {}，说明 AI 胡言乱语了
 					std::cerr << "[Error] LLM 返回的不是 JSON: " << content << std::endl;
-					return result;
+					co_return result;
 				}
 
 				// --- 解析内部 JSON ---
@@ -137,29 +139,27 @@ export NLUResult llmNLU(std::string_view input)
 					}
 				}
 
-				LOG_INFO << "AI识别出的意图: " << result.intent << ", 提取实体数: " << result.entities.size() ;
-				return result;
+				LOG_INFO << "AI识别出的意图: " << result.intent << ", 提取实体数: " << result.entities.size();
+				co_return result;
 			}
 		}
-		catch (const std::exception& e) {
-			std::cerr << "[NLU Error] JSON 解析异常: " << e.what() << std::endl;
-			std::cerr << "原始响应: " << res->body << std::endl;
+		else {
+			LOG_ERROR << "HTTP Error: " << resp->getStatusCode() << " " << resp->getBody();
 		}
 	}
-	else {
-		std::cerr << "[NLU Error] HTTP 请求失败 Status: " << (res ? res->status : -1) << std::endl;
+	catch (const std::exception& e) {
+		LOG_ERROR << "NLU Exception: " << e.what();
 	}
 
-	return result; // 返回默认值 (GREET)
+	co_return result;
 }
 
 
-
-export std::string mockNLU(std::string input)
-{
-	if (input.find("单") != std::string::npos)
-		return "QUERY_ORDER";
-	if (input.find("退") != std::string::npos)
-		return "REFUND";
-	return "GREET";
-}
+//export std::string mockNLU(std::string input)
+//{
+//	if (input.find("单") != std::string::npos)
+//		return "QUERY_ORDER";
+//	if (input.find("退") != std::string::npos)
+//		return "REFUND";
+//	return "GREET";
+//}
