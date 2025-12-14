@@ -6,6 +6,37 @@ import DataAccessObject;
 
 //interface
 
+export class UnknownServiceException :public std::exception
+{
+public:
+	const char* what() const noexcept override {
+		return "Unknown service";
+	}
+};
+
+export class ServiceRegistry {
+public:
+	//-1表示没找到这个类或方法，其他值表示参数个数
+	static int getExpectedArgCount(const std::string& funcName) {
+		static const std::map<std::string, int> whitelist = {
+			{"OrderService.getStatus", 1},       
+			{"OrderService.applyRefund", 2},     
+			{"UserService.getName", 1},         
+			{"PromotionDAO.getTodayPromo", 0},  
+			{"InventoryService.getStock",1},
+			{"CouponService.apply",2},
+			{"PromotionService.getTodayPromo",0}
+		};
+
+		auto it = whitelist.find(funcName);
+		if (it != whitelist.end()) {
+			return it->second;
+		}
+		return -1; 
+	}
+};
+
+
 export std::string dispatchService(std::string_view serviceName, std::string_view methodName,const std::vector<std::string>& args);
 class OrderService
 {
@@ -94,7 +125,9 @@ export std::string dispatchService(std::string_view serviceName, std::string_vie
 			return promotionServ.getTodayPromo();
 		}
 	}
-	return "";
+	else {
+		throw UnknownServiceException();
+	}
 }
 
 std::string OrderService::getStatus(std::string_view orderID)

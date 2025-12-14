@@ -1,8 +1,0 @@
-step begin
-	output "尊敬的{name}，您好。请问您有什么需求？"
-	call read_response as response
-	if response==
-	call show_order_details(order_id) as order_detail
-
-step 
-step default

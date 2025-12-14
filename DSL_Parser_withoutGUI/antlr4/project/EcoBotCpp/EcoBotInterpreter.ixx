@@ -192,7 +192,6 @@ std::any EcoBotInterpreter::visitCallStmt(EcoBotParser::CallStmtContext* ctx)
         auto val = userCtx.find(arg);
 
         if (!val.has_value()) {
-            std::cout << "-1-";//debug
             exit(-1);//TODO
         }
 

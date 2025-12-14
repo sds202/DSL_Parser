@@ -61,7 +61,7 @@ std::string OrderDAO::getStatus(std::string_view orderID)
 		return "DELIVERED";
 		break;
 	case 2:
-		return "NONE";
+		return "NOT_FOUND";
 		break;
 	}
 }
@@ -75,7 +75,7 @@ std::string OrderDAO::applyRefund(std::string_view orderID, std::string_view rea
 		return "SUCCESS";
 		break;
 	case 1:
-		return "Fail";
+		return "FAIL";
 		break;
 	}
 }

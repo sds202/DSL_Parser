@@ -7,6 +7,7 @@ export module Controller;
 import EcoBotInterpreter;
 import IntentRecognition;
 import Context;
+import ValidateVisitor;
 
 struct DSLResources {
 	std::unique_ptr<std::ifstream> fileStream;
@@ -47,6 +48,23 @@ std::shared_ptr<DSLResources> loadDSLInternal(const std::string& scriptPath)
 	data->parser = std::make_unique<EcoBotParser>(data->tokens.get());
 
 	data->tree = data->parser->program();
+
+	//检查语法错误
+	if (data->parser->getNumberOfSyntaxErrors() > 0) {
+		LOG_ERROR << "Fatal Error: Syntax errors found in DSL script: " << scriptPath;
+		return nullptr;
+	}
+
+	// 检查dsl中的类，方法和参数是否正确
+	ValidatorVisitor validator;
+	try {
+		validator.visit(data->tree); 
+		LOG_INFO << "脚本无语法错误，通过静态测试。";
+	}
+	catch (const std::exception& e) {
+		LOG_ERROR << "脚本存在错误： " << e.what();
+		return nullptr;
+	}
 
 
 	for (auto* intent : data->tree->intentDef()) {
@@ -198,6 +216,15 @@ export drogon::Task<std::string> async_web_running(std::string userId, std::stri
 
 	NLUResult result{ co_await llmNLU(userInput,l_dsl_ptr->intents, l_dsl_ptr->keywords, lastIntentCopy, missingSlotCopy) };
 
+	//检查一下用户输入是不是过长
+	std::string tip;
+	std::string safeInput;
+	if (userInput.length() > 200) {
+		safeInput = std::string(userInput.substr(0, 200));
+		LOG_WARN << "用户输入太长截断了。";
+		tip = "（您的输入超过200字，被截断了一部分，回复可能不准确）";
+	}
+
 	//根据LLM结果 预填槽位，更新意图，更新缺失槽位
 	std::lock_guard<std::mutex> userLock(session->mtx);
 
@@ -224,7 +251,7 @@ export drogon::Task<std::string> async_web_running(std::string userId, std::stri
 	if (!targetNode) {
 		//老实说，这个部分不会用到的，毕竟会返回默认意图
 		session->lastTimeIntent = "";
-		co_return "我不知道该怎么处理这个意图";
+		co_return "我不知道该怎么处理这个意图，您的输入可能包含非法信息。";
 	}
 	else {
 		LOG_INFO << "最后确定的意图是：" << finalIntent;
@@ -241,7 +268,10 @@ export drogon::Task<std::string> async_web_running(std::string userId, std::stri
 	catch (const MissingSlotException& e) {
 		session->missingSlot.insert(e.varName);
 	}
+	catch (const std::exception& e) {
+		LOG_ERROR << "System Crash: " << e.what();
+		co_return "系统繁忙，遇到了一点技术问题，请稍后重试。";
+	}
 
-	//最后返回输出
-	co_return interpreter.getOutput();
+	co_return interpreter.getOutput()+tip;
 }

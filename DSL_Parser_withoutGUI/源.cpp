@@ -54,6 +54,7 @@ int main()
 	SetConsoleCP(CP_UTF8);
 
     drogon::app().setLogLevel(trantor::Logger::kDebug);
+    drogon::app().setClientMaxBodySize(5*1024);
 
     initOrReloadDSL("./DSL_script/test1.dsl");
 

@@ -149,6 +149,7 @@
     <ClCompile Include="Context.ixx" />
     <ClCompile Include="DAO.ixx" />
     <ClCompile Include="DBService.ixx" />
+    <ClCompile Include="ValidateVisitor.ixx" />
     <ClCompile Include="源.cpp" />
   </ItemGroup>
   <ItemGroup>

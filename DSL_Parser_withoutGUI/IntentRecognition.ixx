@@ -13,27 +13,58 @@ export struct NLUResult {
 const std::string API_KEY{ "d2856e0dc8a04b6faa2bcaf28c2a979a.EBL2C4nV14ShmO9x" };
 const std::string API_HOST{ "open.bigmodel.cn" };
 const std::string API_PATH{ "/api/paas/v4/chat/completions" };
+const std::string MODEL{"GLM-4.5-Air"};
 const std::string SYS_PROMPT_1{
-	R"(你是一个意图识别助手。请分析用户的输入，并结合用户上次的意图，完成两个任务：
-	1.从中提取意图，并将其归类为最后给出的意图之一
-	2.从中提取实体，并将其归类为最后给出的实体之一。比如用户输入“我要查订单，订单号1102”，则1102就是一个order_id(如果存在这个实体的话)实体。
+	R"(你是一个意图识别助手。这是一个多轮对话场景。请分析用户的输入，完成以下任务。
 
-	要求：
-	1. 分析用户输入，匹配最合适的意图，找不到适当的意图，请返回你觉得是默认的意图，比如打招呼。
-	2. 注意上一次的意图，有可能用户输入的一个实体同时可以对应两个意图，这时你要优先考虑上一次的意图。
-	3. 提取实体值。如果实体在输入中未提及，不要包含在结果中。
-	4. 严格只返回 JSON 格式，不要包含 Markdown 标记（如 ```json），不要包含任何解释。
-	5. 下文提供了用户上一次的意图和上次缺失的实体输入。
+    输入信息包含：
+    1. 用户当前输入
+    2. 可选的意图列表
+    3. 可选的实体类型列表
+    4. 上一次对话的意图 (last_intent)
+    5. 上一次对话缺失的槽位 (missing_slots)
 
-	返回格式示例：
-	{
-	  "intent": "QUERY_ORDER",
-	  "entities": {
-		"order_id": "12345",
-		"reason": "不想要了"
-	  }
-	})"
+    ★★★ 最高优先级规则 (Context Logic) ★★★：
+    如果 【上一次缺失的实体 (missing_slots)】 不为空，且用户的输入看起来正是在补充该实体的信息：
+    1. 你必须 **强制保持** 意图为 【上一次对话的意图 (last_intent)】。
+    2. 绝对 **不要** 将其识别为新的意图（即使看起来像）。
+    3. 只需提取实体值。
+
+    常规要求：
+    1. 如果没有缺失槽位，或者用户输入明显打断了之前的流程（例如“算了，我不退款了，我要查订单”），则根据当前输入识别最匹配的新意图。
+    2. 提取实体值。如果实体在输入中未提及，不要包含在结果中。
+    3. 严格只返回 JSON 格式，不要包含 Markdown 标记，不要包含任何解释。
+	4. 实在没有匹配的意图，就返回看起来像默认的意图（例如“GREET”，前提是该意图必须存在于意图列表中）。
+
+    返回格式示例：
+    {
+      "intent": "QUERY_ORDER",
+      "entities": {
+        "order_id": "12345"
+      }
+    })"
 };
+//const std::string SYS_PROMPT_1{
+//	R"(你是一个意图识别助手。请分析用户的输入，并结合用户上次的意图，完成两个任务：
+//	1.从中提取意图，并将其归类为最后给出的意图之一
+//	2.从中提取实体，并将其归类为最后给出的实体之一。比如用户输入“我要查订单，订单号1102”，则1102就是一个order_id(如果存在这个实体的话)实体。
+//
+//	要求：
+//	1. 分析用户输入，匹配最合适的意图，找不到适当的意图，请返回你觉得是默认的意图，比如打招呼。
+//	2. 注意上一次的意图，有可能用户输入的一个实体同时可以对应两个意图，这时你要优先考虑上一次的意图。
+//	3. 提取实体值。如果实体在输入中未提及，不要包含在结果中。
+//	4. 严格只返回 JSON 格式，不要包含 Markdown 标记（如 ```json），不要包含任何解释。
+//	5. 下文提供了用户上一次的意图和上次缺失的实体输入。
+//
+//	返回格式示例：
+//	{
+//	  "intent": "QUERY_ORDER",
+//	  "entities": {
+//		"order_id": "12345",
+//		"reason": "不想要了"
+//	  }
+//	})"
+//};
 
 std::string initPrompt(const std::vector<std::string>& intents,const std::vector<std::string>& keywords,std::string_view lastTimeIntent,const std::set<std::string>& missingSlot)
 {
@@ -77,7 +108,7 @@ export drogon::Task<NLUResult> llmNLU(std::string_view input, const std::vector<
 	req->setContentTypeCode(drogon::CT_APPLICATION_JSON);
 
 	nlohmann::json requestBody = {
-		{"model", "GLM-4-Flash-250414"}, 
+		{"model", MODEL}, 
 		{"messages", {
 			{
 				{"role", "system"},

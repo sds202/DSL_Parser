@@ -25,7 +25,7 @@ intent APPLY_COUPON {
     } else if (result == "EXPIRED") {
         reply "该优惠券已过期。";
     } else {
-        reply "优惠券无效，请确认后再试。";
+        reply "未知错误，请您稍后重试。";
     }
 }
 

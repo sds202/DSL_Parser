@@ -12,8 +12,10 @@ intent QUERY_ORDER {
         reply "您的订单 ${order_id} 已发货，正在配送中。";
     } else if (status == "DELIVERED") {
         reply "您的订单 ${order_id} 已签收。";
+    } else if(status == "NOT_FOUND") {
+        reply "未查询到该订单。";
     } else {
-        reply "未查询到该订单";
+        reply "未知错误，请您稍后重试。";
     }
 }
 
@@ -25,7 +27,9 @@ intent REFUND {
     
     if (result == "SUCCESS") {
         reply "退款申请已提交。";
-    } else {
+    } else if (result == "FAIL") {
         reply "申请失败，请检查订单号是否正确。";
+    } else {
+        reply "未知错误，请您稍后重试。";
     }
 }
