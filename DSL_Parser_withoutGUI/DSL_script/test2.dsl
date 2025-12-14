@@ -11,7 +11,7 @@ intent PRODUCT_STOCK_QUERY {
     if (stock > 0) {
         reply "商品 ${product_id} 目前库存为 ${stock} 件，可正常购买。";
     } else {
-        reply "抱歉，商品 ${product_id} 暂时缺货。";
+        reply "抱歉，商品 ${product_id} 库存不足，暂时缺货。";
     }
 }
 

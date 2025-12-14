@@ -10,7 +10,7 @@ export struct NLUResult {
 
 	NLUResult() : intent("GREET") {}
 };
-const std::string API_KEY{ "5280be8dae0f45afb0c9f8fd53ba7c2d.JchavmZVZYL0rMhE" };
+const std::string API_KEY{ "d2856e0dc8a04b6faa2bcaf28c2a979a.EBL2C4nV14ShmO9x" };
 const std::string API_HOST{ "open.bigmodel.cn" };
 const std::string API_PATH{ "/api/paas/v4/chat/completions" };
 const std::string SYS_PROMPT_1{
@@ -19,11 +19,11 @@ const std::string SYS_PROMPT_1{
 	2.从中提取实体，并将其归类为最后给出的实体之一。比如用户输入“我要查订单，订单号1102”，则1102就是一个order_id(如果存在这个实体的话)实体。
 
 	要求：
-	1. 分析用户输入，匹配最合适的意图，找不到适当的意图，请返回你觉得是默认的意图，比如打招呼。
-	2. 提取实体值。如果实体在输入中未提及，不要包含在结果中。
-	3. 严格只返回 JSON 格式，不要包含 Markdown 标记（如 ```json），不要包含任何解释。
-	4. 提供了用户上一次的意图和上次缺失的实体输入。
-	5. 如果你发现用户的上一次意图不在给出的意图列表中，这可能是由于服务端恰好更换了新的dsl语言导致的，这时请你返回默认的意图。
+	1. 如果你发现用户的上一次意图不在给出的意图列表（字符串严格匹配，必须相同，因为这是服务端设置的意图名，不是意图的大概意思）中，这可能是由于服务端恰好更换了新的dsl语言导致的，这时请你返回默认的意图。
+	2. 分析用户输入，匹配最合适的意图，找不到适当的意图，请返回你觉得是默认的意图，比如打招呼。
+	3. 提取实体值。如果实体在输入中未提及，不要包含在结果中。
+	4. 严格只返回 JSON 格式，不要包含 Markdown 标记（如 ```json），不要包含任何解释。
+	5. 下文提供了用户上一次的意图和上次缺失的实体输入。
 
 	返回格式示例：
 	{
@@ -66,7 +66,7 @@ export drogon::Task<NLUResult> llmNLU(std::string_view input, const std::vector<
 {
 	std::string system_prompt{initPrompt(intents,keywords,lastTimeIntent,missingSlot)};
 
-	auto client{ drogon::HttpClient::newHttpClient(API_HOST) };
+	auto client{ drogon::HttpClient::newHttpClient("https://"+API_HOST)};
 	auto req{ drogon::HttpRequest::newHttpRequest() };
 	req->setMethod(drogon::Post);
 	req->setPath(API_PATH); 

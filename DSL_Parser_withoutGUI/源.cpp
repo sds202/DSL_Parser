@@ -8,8 +8,14 @@ import Controller;
 drogon::Task<drogon::HttpResponsePtr> Chat(drogon::HttpRequestPtr req)
 {
     auto resp{ drogon::HttpResponse::newHttpResponse() };
-    std::string user_input(req->getBody());
-    std::string result = co_await async_web_running("250", user_input);
+
+    std::string userId = req->getHeader("X-User-ID");
+    if (userId.empty()) {
+        userId = "visitor";
+    }
+
+    std::string userInput(req->getBody());
+    std::string result = co_await async_web_running(userId, userInput);
     resp->setBody(result);
     co_return resp;
 }
@@ -47,7 +53,7 @@ int main()
 	SetConsoleOutputCP(65001);
 	SetConsoleCP(CP_UTF8);
 
-    initOrReloadDSL("./DSL_script/test2.dsl");
+    initOrReloadDSL("./DSL_script/test1.dsl");
 
     drogon::app().registerHandler(
         "/",

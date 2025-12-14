@@ -18,7 +18,7 @@ intent QUERY_ORDER {
 }
 
 intent REFUND {
-    require order_id "请问您要退款哪个订单？";
+    require order_id "请问您要退款哪个订单，请提供给我订单号。";
     require reason "能告诉我退款原因吗？";
     
     result = call OrderService.applyRefund(order_id, reason);
@@ -26,6 +26,6 @@ intent REFUND {
     if (result == "SUCCESS") {
         reply "退款申请已提交。";
     } else {
-        reply "申请失败。";
+        reply "申请失败，请检查订单号是否正确。";
     }
 }
