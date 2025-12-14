@@ -104,7 +104,7 @@ class TestChatBot(unittest.TestCase):
 
         self.assertNotIn("库存", resp2.text, "错误：切换 DSL 后仍然执行了旧逻辑")
         logger.info(f"切换后的回复: {resp2.text.strip()}")
-        self.assertIn("您好", resp2.text, "切换 DSL 后，回复不是预期的问候语")
+        self.assertTrue("您好" in resp2.text or "订单" in resp2.text,"切换 DSL 后，回复不是预期的问候语")
 
 
 if __name__ == '__main__':

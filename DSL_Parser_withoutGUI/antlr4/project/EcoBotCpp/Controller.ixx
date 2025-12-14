@@ -188,6 +188,14 @@ export drogon::Task<std::string> async_web_running(std::string userId, std::stri
 	}
 
 	//使用协程，LLM 识别
+	//先检测是否更新了dsl，如果是，需要刷新lastTimeIntent和slots
+	auto it{ std::find(l_dsl_ptr->intents.begin(),l_dsl_ptr->intents.end(),lastIntentCopy)};
+
+	if (it == l_dsl_ptr->intents.end()) {
+		lastIntentCopy = "";
+		missingSlotCopy.clear();
+	}
+
 	NLUResult result{ co_await llmNLU(userInput,l_dsl_ptr->intents, l_dsl_ptr->keywords, lastIntentCopy, missingSlotCopy) };
 
 	//根据LLM结果 预填槽位，更新意图，更新缺失槽位

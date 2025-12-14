@@ -53,6 +53,8 @@ int main()
 	SetConsoleOutputCP(65001);
 	SetConsoleCP(CP_UTF8);
 
+    drogon::app().setLogLevel(trantor::Logger::kDebug);
+
     initOrReloadDSL("./DSL_script/test1.dsl");
 
     drogon::app().registerHandler(

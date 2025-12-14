@@ -14,16 +14,15 @@ const std::string API_KEY{ "d2856e0dc8a04b6faa2bcaf28c2a979a.EBL2C4nV14ShmO9x" }
 const std::string API_HOST{ "open.bigmodel.cn" };
 const std::string API_PATH{ "/api/paas/v4/chat/completions" };
 const std::string SYS_PROMPT_1{
-	R"(你是一个意图识别助手。请分析用户的输入，并结合上次的意图，完成两个任务：
+	R"(你是一个意图识别助手。请分析用户的输入，并结合用户上次的意图，完成两个任务：
 	1.从中提取意图，并将其归类为最后给出的意图之一
 	2.从中提取实体，并将其归类为最后给出的实体之一。比如用户输入“我要查订单，订单号1102”，则1102就是一个order_id(如果存在这个实体的话)实体。
 
 	要求：
-	1. 如果你发现用户的上一次意图不在给出的意图列表（字符串严格匹配，必须相同，因为这是服务端设置的意图名，不是意图的大概意思）中，这可能是由于服务端恰好更换了新的dsl语言导致的，这时请你返回默认的意图。
-	2. 分析用户输入，匹配最合适的意图，找不到适当的意图，请返回你觉得是默认的意图，比如打招呼。
-	3. 提取实体值。如果实体在输入中未提及，不要包含在结果中。
-	4. 严格只返回 JSON 格式，不要包含 Markdown 标记（如 ```json），不要包含任何解释。
-	5. 下文提供了用户上一次的意图和上次缺失的实体输入。
+	1. 分析用户输入，匹配最合适的意图，找不到适当的意图，请返回你觉得是默认的意图，比如打招呼。
+	2. 提取实体值。如果实体在输入中未提及，不要包含在结果中。
+	3. 严格只返回 JSON 格式，不要包含 Markdown 标记（如 ```json），不要包含任何解释。
+	4. 下文提供了用户上一次的意图和上次缺失的实体输入。
 
 	返回格式示例：
 	{
@@ -58,12 +57,15 @@ std::string initPrompt(const std::vector<std::string>& intents,const std::vector
 	for (std::string_view slot : missingSlot) {//todo
 		oss << slot << ' ';
 	}
+	oss << "]";
 
 	return oss.str();
 }
 
 export drogon::Task<NLUResult> llmNLU(std::string_view input, const std::vector<std::string>& intents, const std::vector<std::string>& keywords, std::string_view lastTimeIntent, const std::set<std::string>& missingSlot)
 {
+	NLUResult result; //默认是GREET
+
 	std::string system_prompt{initPrompt(intents,keywords,lastTimeIntent,missingSlot)};
 
 	auto client{ drogon::HttpClient::newHttpClient("https://"+API_HOST)};
@@ -74,7 +76,7 @@ export drogon::Task<NLUResult> llmNLU(std::string_view input, const std::vector<
 	req->setContentTypeCode(drogon::CT_APPLICATION_JSON);
 
 	nlohmann::json requestBody = {
-		{"model", "glm-4.5"}, 
+		{"model", "GLM-4-Flash-250414"}, 
 		{"messages", {
 			{
 				{"role", "system"},
@@ -94,14 +96,11 @@ export drogon::Task<NLUResult> llmNLU(std::string_view input, const std::vector<
 
 	req->setBody(requestBody.dump());
 
-	NLUResult result; // 默认是 GREET
-
 	try {
 		auto resp = co_await client->sendRequestCoro(req);
 
 		if (resp->getStatusCode() == 200) {
 			auto response = nlohmann::json::parse(resp->getBody());
-
 
 			if (response.contains("choices") && !response["choices"].empty()) {
 				std::string content = response["choices"][0]["message"]["content"];
