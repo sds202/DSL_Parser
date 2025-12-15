@@ -22,7 +22,7 @@ public:
 	ChatService(const ChatService&) = delete;
 	ChatService& operator=(const ChatService&) = delete;
 	drogon::Task<std::string> handleInput(std::string userId, std::string userInput);
-	bool initOrReloadDSL(const std::string& scriptPath);
+	std::expected<void, std::string> initOrReloadDSL(const std::string& scriptPath);
 };
 
 //implementations
@@ -118,7 +118,7 @@ drogon::Task<std::string> ChatService::handleInput(std::string userId, std::stri
 
 	co_return interpreter.getOutput() + tip;
 }
-bool ChatService::initOrReloadDSL(const std::string& scriptPath)
+std::expected<void,std::string> ChatService::initOrReloadDSL(const std::string& scriptPath)
 {
 	return dslManager.initOrReloadDSL(scriptPath);
 }

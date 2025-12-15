@@ -22,16 +22,29 @@ export struct DSLResources {
 export class DSLManager
 {
 private:
-	std::shared_ptr<DSLResources> loadDSLInternal(const std::string& scriptPath);
+	std::expected<std::shared_ptr<DSLResources>, std::string> loadDSLInternal(const std::string& scriptPath);
 	std::atomic<std::shared_ptr<DSLResources>> dsl_ptr;
 public:
-	bool initOrReloadDSL(const std::string& scriptPath);
+	std::expected<void, std::string> initOrReloadDSL(const std::string& scriptPath);
 	std::shared_ptr<DSLResources> loadDSLPtr();
+};
+
+class DSLErrorListener :public antlr4::BaseErrorListener {
+public:
+	std::stringstream errorMsgStream;
+	void syntaxError(antlr4::Recognizer* recognizer, antlr4::Token* offendingSymbol, size_t line, size_t charPositionInLine, const std::string& msg, std::exception_ptr e) override {
+		errorMsgStream << "[Syntax Error] Line " << line << ":" << charPositionInLine
+			<< " - " << msg << "\n";
+	}
+
+	std::string getErrorMessage() const {
+		return errorMsgStream.str();
+	}
 };
 
 //implementations
 
-std::shared_ptr<DSLResources> DSLManager::loadDSLInternal(const std::string& scriptPath)
+std::expected<std::shared_ptr<DSLResources>,std::string> DSLManager::loadDSLInternal(const std::string& scriptPath)
 {
 	auto data{ std::make_shared<DSLResources>() };
 
@@ -47,12 +60,21 @@ std::shared_ptr<DSLResources> DSLManager::loadDSLInternal(const std::string& scr
 	data->tokens = std::make_unique<antlr4::CommonTokenStream>(data->lexer.get());
 	data->parser = std::make_unique<EcoBotParser>(data->tokens.get());
 
+	DSLErrorListener errorListener;
+
+	data->lexer->removeErrorListeners();
+	data->parser->removeErrorListeners();
+
+	data->lexer->addErrorListener(&errorListener);
+	data->parser->addErrorListener(&errorListener);
+
 	data->tree = data->parser->program();
 
 	//检查语法错误
 	if (data->parser->getNumberOfSyntaxErrors() > 0) {
 		LOG_ERROR << "Fatal Error: Syntax errors found in DSL script: " << scriptPath;
-		return nullptr;
+		std::string allErrors{ errorListener.getErrorMessage() };
+		return std::unexpected(allErrors);
 	}
 
 	// 检查dsl中的类，方法和参数是否正确
@@ -63,7 +85,8 @@ std::shared_ptr<DSLResources> DSLManager::loadDSLInternal(const std::string& scr
 	}
 	catch (const std::exception& e) {
 		LOG_ERROR << "脚本存在错误： " << e.what();
-		return nullptr;
+		std::string allErrors{ errorListener.getErrorMessage() + e.what() };
+		return std::unexpected(allErrors);
 	}
 
 
@@ -88,17 +111,18 @@ std::shared_ptr<DSLResources> DSLManager::loadDSLInternal(const std::string& scr
 
 	return data;
 }
-bool DSLManager::initOrReloadDSL(const std::string& scriptPath)
+std::expected<void,std::string> DSLManager::initOrReloadDSL(const std::string& scriptPath)
 {
 	auto newDSL = loadDSLInternal(scriptPath);
-	if (newDSL) {
-		dsl_ptr.store(newDSL);
+	
+	if (newDSL.has_value()) {
+		dsl_ptr.store(newDSL.value());
 		LOG_INFO << "脚本初始化/更换完成";
-		return true;
+		return {};
 	}
 	else {
 		LOG_ERROR << "脚本加载失败，保持原样";
-		return false;
+		return std::unexpected(newDSL.error());
 	}
 }
 std::shared_ptr<DSLResources> DSLManager::loadDSLPtr()

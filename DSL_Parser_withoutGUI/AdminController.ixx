@@ -25,7 +25,7 @@ drogon::Task<drogon::HttpResponsePtr> AdminController::Configure(drogon::HttpReq
 
     LOG_INFO << "管理员正在请求切换 DSL 至: " << newDslPath;
 
-    bool success{ ChatService::instance().initOrReloadDSL(newDslPath) };
+    auto success{ ChatService::instance().initOrReloadDSL(newDslPath) };
 
     if (success) {
         resp->setStatusCode(drogon::k200OK);
@@ -33,7 +33,7 @@ drogon::Task<drogon::HttpResponsePtr> AdminController::Configure(drogon::HttpReq
     }
     else {
         resp->setStatusCode(drogon::k500InternalServerError);
-        resp->setBody("Failed: Syntax error or file not found. System kept old logic.");
+        resp->setBody("Failed: Syntax error or file not found. System kept old logic."+success.error());
     }
 
     co_return resp;
