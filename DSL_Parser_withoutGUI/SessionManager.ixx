@@ -1,3 +1,6 @@
+module;
+#include<drogon/drogon.h>
+
 export module SessionManager;
 import std;
 import Context;
@@ -12,10 +15,12 @@ export struct UserSession {
 export class SessionManager
 {
 public:
+	SessionManager():sessions(drogon::app().getLoop(),60.0*10,60.0){ }
 	std::shared_ptr<UserSession> getOrCreateUserSession(const std::string & userId);
 private:
-	std::map<std::string, std::shared_ptr<UserSession>> sessions;
-	std::shared_mutex session_mtx;
+	drogon::CacheMap<std::string, std::shared_ptr<UserSession>> sessions;
+	//std::map<std::string, std::shared_ptr<UserSession>> sessions;
+	//std::shared_mutex session_mtx;
 };
 
 //implementations
@@ -23,25 +28,15 @@ private:
 std::shared_ptr<UserSession> SessionManager::getOrCreateUserSession(const std::string& userId)
 {
 	std::shared_ptr<UserSession> session;
-	{
-		std::shared_lock<std::shared_mutex> session_lock(session_mtx);
-		auto it{ sessions.find(userId) };
-		if (it != sessions.end()) {
-			session = it->second;
-		}
-	}
-	if (!session) {
-		std::unique_lock<std::shared_mutex>session_write_lock(session_mtx);
-		auto it = sessions.find(userId);
-		if (it == sessions.end()) {
-			session = std::make_shared<UserSession>();
-			session->ctx.add("user_id", userId);
-			sessions[userId] = session;
-		}
-		else {
-			session = it->second;
-		}
-	}
 
+	if (sessions.findAndFetch(userId,session)) {
+		return session;
+	}
+	else {
+		session = std::make_shared<UserSession>();
+		session->ctx.add("user_id", userId);
+
+		sessions.insert(userId, session);
+	}
 	return session;
 }

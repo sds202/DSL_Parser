@@ -3,6 +3,7 @@ import json
 import re
 import time
 import logging
+import random
 
 app = Flask(__name__)
 
@@ -11,7 +12,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 # 配置
 MOCK_PORT = 8081
-SIMULATE_DELAY = 0.2
+SIMULATE_DELAY = random.uniform(0.5, 3)  # 模拟延迟，单位秒
 
 @app.route('/api/paas/v4/chat/completions', methods=['POST'])
 def mock_chat_completion():
