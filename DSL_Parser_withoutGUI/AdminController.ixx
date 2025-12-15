@@ -1,4 +1,4 @@
-module;
+ï»¿module;
 #include <drogon/drogon.h>
 
 export module AdminController;
@@ -23,7 +23,7 @@ drogon::Task<drogon::HttpResponsePtr> AdminController::Configure(drogon::HttpReq
         co_return resp;
     }
 
-    LOG_INFO << "¹ÜÀíÔ±ÕýÔÚÇëÇóÇÐ»» DSL ÖÁ: " << newDslPath;
+    LOG_INFO << "ç®¡ç†å‘˜æ­£åœ¨è¯·æ±‚åˆ‡æ¢ DSL è‡³: " << newDslPath;
 
     bool success{ ChatService::instance().initOrReloadDSL(newDslPath) };
 

@@ -7,29 +7,48 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Title="DSL_parser_winui3">
+    Title="EcoBot">
 
     <Window.SystemBackdrop>
         <MicaBackdrop />
     </Window.SystemBackdrop>
 
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+        <!-- Welcome Interface -->
+        <Grid x:Name="WelcomeInterface" VerticalAlignment="Center" HorizontalAlignment="Center" RowSpacing="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            
+            <TextBlock Text="Welcome to ChatBot" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center"/>
+            <TextBox x:Name="UserIdInput" Grid.Row="1" PlaceholderText="Enter User ID" Width="250" HorizontalAlignment="Center" FontSize="16" Height="40" VerticalContentAlignment="Center"/>
+            <Button Grid.Row="2" Content="Start Chat" Click="OnStartChatClick" HorizontalAlignment="Center" Style="{StaticResource AccentButtonStyle}" FontSize="16" Padding="20,10,20,10"/>
+        </Grid>
 
-        <ScrollViewer x:Name="ChatScrollViewer" Grid.Row="0" Margin="20" VerticalScrollBarVisibility="Hidden">
-            <StackPanel x:Name="ChatPanel" Spacing="12"/>
-        </ScrollViewer>
+        <!-- Chat Interface -->
+        <Grid x:Name="ChatInterface" Visibility="Collapsed" Opacity="0">
+            <Grid.RenderTransform>
+                <TranslateTransform x:Name="ChatTranslate" Y="40"/>
+            </Grid.RenderTransform>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-        <Grid Grid.Row="1" Margin="20" ColumnSpacing="12">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <TextBox x:Name="MessageInput" PlaceholderText="Type a message..." KeyDown="OnInputKeyDown" FontSize="16" Height="45" VerticalAlignment="Center" VerticalContentAlignment="Center" Padding="12,8,12,0"/>
-            <Button Grid.Column="1" Content="Send" Click="OnSendClick" FontSize="16" Height="45" Padding="20,0,20,0" VerticalAlignment="Center" Style="{StaticResource AccentButtonStyle}"/>
+            <ScrollViewer x:Name="ChatScrollViewer" Grid.Row="0" Margin="20" VerticalScrollBarVisibility="Hidden">
+                <StackPanel x:Name="ChatPanel" Spacing="12"/>
+            </ScrollViewer>
+
+            <Grid Grid.Row="1" Margin="20" ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBox x:Name="MessageInput" PlaceholderText="Type a message..." KeyDown="OnInputKeyDown" FontSize="16" Height="45" VerticalAlignment="Center" VerticalContentAlignment="Center" Padding="12,10,12,10"/>
+                <Button Grid.Column="1" Content="Send" Click="OnSendClick" FontSize="16" Height="45" Padding="20,0,20,0" VerticalAlignment="Center" Style="{StaticResource AccentButtonStyle}"/>
+            </Grid>
         </Grid>
     </Grid>
 </Window>

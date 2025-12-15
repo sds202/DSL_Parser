@@ -17,11 +17,13 @@
 #include <winrt/Windows.System.Threading.h>
 #include <winrt/Microsoft.UI.Dispatching.h>
 #include <winrt/Microsoft.UI.Windowing.h>
+#include <winrt/Microsoft.UI.Xaml.Media.Animation.h>
 
 using namespace winrt;
 using namespace Microsoft::UI::Xaml;
 using namespace Microsoft::UI::Xaml::Controls;
 using namespace Microsoft::UI::Xaml::Media;
+using namespace Microsoft::UI::Xaml::Media::Animation;
 using namespace Windows::Web::Http;
 using namespace Windows::Foundation;
 
@@ -52,6 +54,63 @@ namespace winrt::DSL_parser_winui3::implementation
         }
     }
 
+    void MainWindow::OnStartChatClick(Windows::Foundation::IInspectable const&, RoutedEventArgs const&)
+    {
+        hstring userId = UserIdInput().Text();
+        if (userId.empty()) return;
+
+        m_userId = userId;
+
+        // 1. Fade out Welcome
+        DoubleAnimation fadeOut;
+        fadeOut.Duration(DurationHelper::FromTimeSpan(std::chrono::milliseconds(300)));
+        fadeOut.From(1.0);
+        fadeOut.To(0.0);
+
+        Storyboard sbOut;
+        sbOut.Children().Append(fadeOut);
+        Storyboard::SetTarget(fadeOut, WelcomeInterface());
+        Storyboard::SetTargetProperty(fadeOut, L"Opacity");
+
+        auto weak_this = get_weak();
+        sbOut.Completed([weak_this](auto&&...) {
+            if (auto strong_this = weak_this.get()) {
+                strong_this->WelcomeInterface().Visibility(Visibility::Collapsed);
+                strong_this->ChatInterface().Visibility(Visibility::Visible);
+
+                // 2. Fade in Chat + Slide Up
+                DoubleAnimation fadeIn;
+                fadeIn.Duration(DurationHelper::FromTimeSpan(std::chrono::milliseconds(500)));
+                fadeIn.To(1.0);
+
+                DoubleAnimation slideUp;
+                slideUp.Duration(DurationHelper::FromTimeSpan(std::chrono::milliseconds(500)));
+                slideUp.To(0.0);
+
+                ExponentialEase ease;
+                ease.EasingMode(EasingMode::EaseOut);
+                slideUp.EasingFunction(ease);
+
+                Storyboard sbIn;
+                sbIn.Children().Append(fadeIn);
+                sbIn.Children().Append(slideUp);
+
+                Storyboard::SetTarget(fadeIn, strong_this->ChatInterface());
+                Storyboard::SetTargetProperty(fadeIn, L"Opacity");
+
+                Storyboard::SetTarget(slideUp, strong_this->ChatTranslate());
+                Storyboard::SetTargetProperty(slideUp, L"Y");
+
+                sbIn.Begin();
+
+                // Automatically send "你好"
+                strong_this->SendMessageAsync(L"\u4F60\u597D");
+            }
+        });
+
+        sbOut.Begin();
+    }
+
     void MainWindow::OnSendClick(Windows::Foundation::IInspectable const&, RoutedEventArgs const&)
     {
         hstring text = MessageInput().Text();
@@ -78,6 +137,11 @@ namespace winrt::DSL_parser_winui3::implementation
             HttpClient client;
             Uri uri{ L"http://localhost:8080" };
             HttpStringContent content{ message, Windows::Storage::Streams::UnicodeEncoding::Utf8, L"text/plain" };
+
+            if (!m_userId.empty())
+            {
+                client.DefaultRequestHeaders().Append(L"X-User-ID", m_userId);
+            }
 
             HttpResponseMessage response = co_await client.PostAsync(uri, content);
             

@@ -11,7 +11,8 @@ export struct NLUResult {
 	NLUResult() : intent("GREET") {}
 };
 const std::string API_KEY{ "d2856e0dc8a04b6faa2bcaf28c2a979a.EBL2C4nV14ShmO9x" };
-const std::string API_HOST{ "open.bigmodel.cn" };
+const std::string API_HOST{ "https://open.bigmodel.cn" };
+const std::string MOCK_API_HOST{ "http://127.0.0.1:8081" };
 const std::string API_PATH{ "/api/paas/v4/chat/completions" };
 const std::string MODEL{"GLM-4.5-Air"};
 const std::string SYS_PROMPT_1{
@@ -89,7 +90,7 @@ export drogon::Task<NLUResult> IntentRecognition::llmNLU(std::string_view input,
 
 	std::string system_prompt{initPrompt(intents,keywords,lastTimeIntent,missingSlot)};
 
-	auto client{ drogon::HttpClient::newHttpClient("https://"+API_HOST)};
+	auto client{ drogon::HttpClient::newHttpClient(MOCK_API_HOST)};
 	auto req{ drogon::HttpRequest::newHttpRequest() };
 	req->setMethod(drogon::Post);
 	req->setPath(API_PATH); 

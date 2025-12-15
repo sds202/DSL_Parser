@@ -10,8 +10,10 @@ namespace winrt::DSL_parser_winui3::implementation
 
         void OnSendClick(Windows::Foundation::IInspectable const& sender, Microsoft::UI::Xaml::RoutedEventArgs const& args);
         void OnInputKeyDown(Windows::Foundation::IInspectable const& sender, Microsoft::UI::Xaml::Input::KeyRoutedEventArgs const& args);
+        void OnStartChatClick(Windows::Foundation::IInspectable const& sender, Microsoft::UI::Xaml::RoutedEventArgs const& args);
 
     private:
+        winrt::hstring m_userId;
         winrt::fire_and_forget SendMessageAsync(winrt::hstring message);
         void AppendMessage(winrt::hstring const& message, bool isUser, bool animate = false);
         winrt::fire_and_forget TypewriteTextAsync(Microsoft::UI::Xaml::Controls::TextBlock textBlock, winrt::hstring message);
