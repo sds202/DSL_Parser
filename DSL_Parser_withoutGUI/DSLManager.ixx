@@ -1,0 +1,107 @@
+﻿module;
+#include "antlr4/project/EcoBotCpp/EcoBotParser.h"
+#include "antlr4/project/EcoBotCpp/EcoBotLexer.h"
+#include "drogon/drogon.h"
+
+export module DSLManager;
+import std;
+import ValidateVisitor;
+
+export struct DSLResources {
+	std::unique_ptr<std::ifstream> fileStream;
+	std::unique_ptr<antlr4::ANTLRInputStream> input;
+	std::unique_ptr<EcoBotLexer> lexer;
+	std::unique_ptr<antlr4::CommonTokenStream> tokens;
+	std::unique_ptr<EcoBotParser> parser;
+	EcoBotParser::ProgramContext* tree = nullptr;
+
+	std::vector<std::string> intents;
+	std::vector<std::string> keywords;
+};
+
+export class DSLManager
+{
+private:
+	std::shared_ptr<DSLResources> loadDSLInternal(const std::string& scriptPath);
+	std::atomic<std::shared_ptr<DSLResources>> dsl_ptr;
+public:
+	bool initOrReloadDSL(const std::string& scriptPath);
+	std::shared_ptr<DSLResources> loadDSLPtr();
+};
+
+//implementations
+
+std::shared_ptr<DSLResources> DSLManager::loadDSLInternal(const std::string& scriptPath)
+{
+	auto data{ std::make_shared<DSLResources>() };
+
+	data->fileStream = std::make_unique<std::ifstream>(scriptPath);
+
+	if (!data->fileStream->is_open()) {
+		LOG_ERROR << "Fatal Error: Cannot open DSL script: " << scriptPath;
+		return nullptr;
+	}
+
+	data->input = std::make_unique<antlr4::ANTLRInputStream>(*data->fileStream);
+	data->lexer = std::make_unique<EcoBotLexer>(data->input.get());
+	data->tokens = std::make_unique<antlr4::CommonTokenStream>(data->lexer.get());
+	data->parser = std::make_unique<EcoBotParser>(data->tokens.get());
+
+	data->tree = data->parser->program();
+
+	//检查语法错误
+	if (data->parser->getNumberOfSyntaxErrors() > 0) {
+		LOG_ERROR << "Fatal Error: Syntax errors found in DSL script: " << scriptPath;
+		return nullptr;
+	}
+
+	// 检查dsl中的类，方法和参数是否正确
+	ValidatorVisitor validator;
+	try {
+		validator.visit(data->tree);
+		LOG_INFO << "脚本无语法错误，通过静态测试。";
+	}
+	catch (const std::exception& e) {
+		LOG_ERROR << "脚本存在错误： " << e.what();
+		return nullptr;
+	}
+
+
+	for (auto* intent : data->tree->intentDef()) {
+		std::string intentName{ intent->ID()->getText() };
+		data->intents.push_back(intentName);
+		for (auto* stmt : intent->stmtList()->stmt()) {
+			if (stmt->requireStmt()) {
+				auto* reqCtx{ stmt->requireStmt() };
+				std::string keyword{ reqCtx->ID()->getText() };
+				data->keywords.push_back(keyword);
+			}
+			else if (stmt->callStmt()) {
+				auto* callCtx{ stmt->callStmt() };
+				if (callCtx->ID()) {
+					std::string keyword{ callCtx->ID()->getText() };
+					data->keywords.push_back(keyword);
+				}
+			}
+		}
+	}
+
+	return data;
+}
+bool DSLManager::initOrReloadDSL(const std::string& scriptPath)
+{
+	auto newDSL = loadDSLInternal(scriptPath);
+	if (newDSL) {
+		dsl_ptr.store(newDSL);
+		LOG_INFO << "脚本初始化/更换完成";
+		return true;
+	}
+	else {
+		LOG_ERROR << "脚本加载失败，保持原样";
+		return false;
+	}
+}
+std::shared_ptr<DSLResources> DSLManager::loadDSLPtr()
+{
+	return dsl_ptr.load();
+}

@@ -3,7 +3,6 @@ module;
 export module DataAccessObject;
 import std;
 
-//interface
 unsigned long long polyHash(const std::string& s, int max);
 
 export class OrderDAO

@@ -44,29 +44,18 @@ const std::string SYS_PROMPT_1{
       }
     })"
 };
-//const std::string SYS_PROMPT_1{
-//	R"(你是一个意图识别助手。请分析用户的输入，并结合用户上次的意图，完成两个任务：
-//	1.从中提取意图，并将其归类为最后给出的意图之一
-//	2.从中提取实体，并将其归类为最后给出的实体之一。比如用户输入“我要查订单，订单号1102”，则1102就是一个order_id(如果存在这个实体的话)实体。
-//
-//	要求：
-//	1. 分析用户输入，匹配最合适的意图，找不到适当的意图，请返回你觉得是默认的意图，比如打招呼。
-//	2. 注意上一次的意图，有可能用户输入的一个实体同时可以对应两个意图，这时你要优先考虑上一次的意图。
-//	3. 提取实体值。如果实体在输入中未提及，不要包含在结果中。
-//	4. 严格只返回 JSON 格式，不要包含 Markdown 标记（如 ```json），不要包含任何解释。
-//	5. 下文提供了用户上一次的意图和上次缺失的实体输入。
-//
-//	返回格式示例：
-//	{
-//	  "intent": "QUERY_ORDER",
-//	  "entities": {
-//		"order_id": "12345",
-//		"reason": "不想要了"
-//	  }
-//	})"
-//};
 
-std::string initPrompt(const std::vector<std::string>& intents,const std::vector<std::string>& keywords,std::string_view lastTimeIntent,const std::set<std::string>& missingSlot)
+export class IntentRecognition
+{
+private:
+	std::string initPrompt(const std::vector<std::string>& intents, const std::vector<std::string>& keywords, std::string_view lastTimeIntent, const std::set<std::string>& missingSlot);
+public:
+	drogon::Task<NLUResult> llmNLU(std::string_view input, const std::vector<std::string>& intents, const std::vector<std::string>& keywords, std::string_view lastTimeIntent, const std::set<std::string>& missingSlot);
+};
+
+//implementations
+
+std::string IntentRecognition::initPrompt(const std::vector<std::string>& intents,const std::vector<std::string>& keywords,std::string_view lastTimeIntent,const std::set<std::string>& missingSlot)
 {
 	std::stringstream oss;
 
@@ -94,7 +83,7 @@ std::string initPrompt(const std::vector<std::string>& intents,const std::vector
 	return oss.str();
 }
 
-export drogon::Task<NLUResult> llmNLU(std::string_view input, const std::vector<std::string>& intents, const std::vector<std::string>& keywords, std::string_view lastTimeIntent, const std::set<std::string>& missingSlot)
+export drogon::Task<NLUResult> IntentRecognition::llmNLU(std::string_view input, const std::vector<std::string>& intents, const std::vector<std::string>& keywords, std::string_view lastTimeIntent, const std::set<std::string>& missingSlot)
 {
 	NLUResult result; //默认是GREET
 

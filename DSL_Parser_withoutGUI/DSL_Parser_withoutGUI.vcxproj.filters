@@ -36,9 +36,6 @@
     <ClCompile Include="antlr4\project\EcoBotCpp\EcoBotInterpreter.ixx">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="antlr4\project\EcoBotCpp\Controller.ixx">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="IntentRecognition.ixx">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -52,6 +49,21 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="ValidateVisitor.ixx">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="AdminController.ixx">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="UserController.ixx">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ChatService.ixx">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="DSLManager.ixx">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="SessionManager.ixx">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

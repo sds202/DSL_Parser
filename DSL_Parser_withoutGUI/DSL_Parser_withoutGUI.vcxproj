@@ -138,13 +138,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AdminController.ixx" />
     <ClCompile Include="antlr4\project\EcoBotCpp\EcoBotBaseVisitor.cpp" />
     <ClCompile Include="antlr4\project\EcoBotCpp\EcoBotLexer.cpp" />
     <ClCompile Include="antlr4\project\EcoBotCpp\EcoBotListener.cpp" />
     <ClCompile Include="antlr4\project\EcoBotCpp\EcoBotParser.cpp" />
     <ClCompile Include="antlr4\project\EcoBotCpp\EcoBotVisitor.cpp" />
     <ClCompile Include="antlr4\project\EcoBotCpp\EcoBotInterpreter.ixx" />
-    <ClCompile Include="antlr4\project\EcoBotCpp\Controller.ixx" />
+    <ClCompile Include="ChatService.ixx" />
+    <ClCompile Include="DSLManager.ixx" />
+    <ClCompile Include="SessionManager.ixx" />
+    <ClCompile Include="UserController.ixx" />
     <ClCompile Include="IntentRecognition.ixx" />
     <ClCompile Include="Context.ixx" />
     <ClCompile Include="DAO.ixx" />

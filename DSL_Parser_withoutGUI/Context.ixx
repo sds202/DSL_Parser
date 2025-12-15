@@ -13,6 +13,8 @@ public:
 
 };
 
+//implementations
+
 void Context::add(std::string key, std::string value)
 {
 	memory.insert_or_assign(std::move(key), std::move(value));

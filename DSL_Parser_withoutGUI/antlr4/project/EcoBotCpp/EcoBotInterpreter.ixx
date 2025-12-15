@@ -36,6 +36,8 @@ private:
 
 };
 
+//implementations
+
 EcoBotInterpreter::EcoBotInterpreter(Context& context)
     :userCtx(context)
 {

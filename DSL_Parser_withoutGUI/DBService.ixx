@@ -4,8 +4,6 @@ export module DBService;
 import std;
 import DataAccessObject;
 
-//interface
-
 export class UnknownServiceException :public std::exception
 {
 public:
@@ -38,6 +36,7 @@ public:
 
 
 export std::string dispatchService(std::string_view serviceName, std::string_view methodName,const std::vector<std::string>& args);
+
 class OrderService
 {
 public:
