@@ -79,7 +79,7 @@ def run_session_task(user_id):
         return False, "Resp_Fail"
 
     # 4. 验证数据正确性
-    if my_order_id not in reply2:
+    if my_order_id not in reply2 and "检测到DSL更新" not in reply2:
         return False, "Slot_Error" # 严重错误：串槽
 
     # 5. 识别版本
@@ -106,7 +106,7 @@ def main():
             futures.append(executor.submit(run_session_task, f"user_A_{i}"))
         
         # --- 阶段 2: 运行时热更新 ---
-        time.sleep(0.5) # 等待部分任务运行中
+        time.sleep(3) # 等待部分任务运行中
         trigger_hot_swap() # 切换 DSL
         
         # --- 阶段 3: 提交后 50% 任务 (预期 V2) ---

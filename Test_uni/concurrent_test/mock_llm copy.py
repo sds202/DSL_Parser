@@ -33,11 +33,13 @@ def mock_chat_completion():
     # 解析成功，提取字段
     messages = data.get('messages', [])
     user_input = ""
+    system_prompt = ""
     for msg in messages:
         if msg.get('role') == 'user':
             user_input = msg.get('content', '')
 
     print(f"[INFO] 解析成功，用户输入: {user_input}")
+
 
     # 模拟延迟
     if SIMULATE_DELAY > 0:

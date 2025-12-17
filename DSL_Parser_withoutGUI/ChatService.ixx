@@ -42,26 +42,84 @@ drogon::Task<std::string> ChatService::handleInput(std::string userId, std::stri
 
 	{
 		std::lock_guard<std::mutex> userLock(session->mtx);
+
+		if (session->currentDslVersion != l_dsl_ptr->version) {
+			session->currentDslVersion = l_dsl_ptr->version;
+
+			//需要做全面检查
+			if (!session->lastTimeIntent.empty()) {
+
+				LOG_INFO << "检测到 DSL 版本变更 (v" << session->currentDslVersion
+					<< " -> v" << l_dsl_ptr->version << ")，正在检查兼容性...";
+
+				bool isCompatible{ false };
+
+				//检查意图是否存在
+				auto intentIt = std::find(l_dsl_ptr->intents.begin(), l_dsl_ptr->intents.end(), session->lastTimeIntent);
+
+				if (intentIt != l_dsl_ptr->intents.end()) {
+					//检查槽位是否兼容
+					bool slotsCompatible = true;
+					for (const auto& slot : session->missingSlot) {
+						if (!l_dsl_ptr->hasSlot(session->lastTimeIntent, slot)) {
+							slotsCompatible = false;
+							break;
+						}
+					}
+					if (slotsCompatible) isCompatible = true;
+				}
+
+				//如果不兼容，重置状态
+				if (!isCompatible) {
+					LOG_WARN << "版本不兼容，重置用户 " << userId << " 的会话状态。";
+					session->lastTimeIntent.clear();
+					session->missingSlot.clear();
+				}
+				else {
+					LOG_INFO << "版本兼容，用户状态已平滑迁移。";
+				}
+			}
+		}
 		lastIntentCopy = session->lastTimeIntent;
 		missingSlotCopy = session->missingSlot;
 	}
 
 	//使用协程，LLM 识别
 	//先检测是否更新了dsl，如果是，需要刷新lastTimeIntent和slots
+	bool isCompatiable{ true };
+	auto intentIt = std::find(l_dsl_ptr->intents.begin(), l_dsl_ptr->intents.end(), lastIntentCopy);
+	if (intentIt != l_dsl_ptr->intents.end()) {
+		bool slotsCompatible = true;
+		for (const auto& slot : missingSlotCopy) {
+			if (!l_dsl_ptr->hasSlot(lastIntentCopy, slot)) {
+				slotsCompatible = false;
+				break;
+			}
+		}
+
+		if (slotsCompatible) {
+			isCompatible = true;
+		}
+	}
+
+
 	auto it{ std::find(l_dsl_ptr->intents.begin(),l_dsl_ptr->intents.end(),lastIntentCopy) };
 
+	std::string tipReloadDSL;
 	if (it == l_dsl_ptr->intents.end()) {
 		lastIntentCopy = "";
 		missingSlotCopy.clear();
+		tipReloadDSL = "（检测到DSL更新，您的对话可能受影响）";
 	}
 
+
 	//检查一下用户输入是不是过长
-	std::string tip;
+	std::string tipToLong;
 	std::string safeInput;
 	if (userInput.length() > 200) {
 		safeInput = std::string(userInput.substr(0, 200));
 		LOG_WARN << "用户输入太长截断了。";
-		tip = "（您的输入超过200字，被截断了一部分，回复可能不准确）";
+		tipToLong = "（您的输入超过200字，被截断了一部分，回复可能不准确）";
 	}
 	else {
 		safeInput = userInput;
@@ -116,7 +174,7 @@ drogon::Task<std::string> ChatService::handleInput(std::string userId, std::stri
 		co_return "系统繁忙，遇到了一点技术问题，请稍后重试。";
 	}
 
-	co_return interpreter.getOutput() + tip;
+	co_return interpreter.getOutput() + tipReloadDSL + tipToLong;
 }
 std::expected<void,std::string> ChatService::initOrReloadDSL(const std::string& scriptPath)
 {

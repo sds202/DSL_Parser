@@ -17,6 +17,11 @@ export struct DSLResources {
 
 	std::vector<std::string> intents;
 	std::vector<std::string> keywords;
+	std::map<std::string, std::set<std::string>>intentSlots;
+
+	size_t version{ 0 };
+
+	bool hasSlot(const std::string& intent, const std::string& slot) const;
 };
 
 export class DSLManager
@@ -24,6 +29,7 @@ export class DSLManager
 private:
 	std::expected<std::shared_ptr<DSLResources>, std::string> loadDSLInternal(const std::string& scriptPath);
 	std::atomic<std::shared_ptr<DSLResources>> dsl_ptr;
+	std::atomic<size_t> dsl_version_counter{ 1 };
 public:
 	std::expected<void, std::string> initOrReloadDSL(const std::string& scriptPath);
 	std::shared_ptr<DSLResources> loadDSLPtr();
@@ -98,6 +104,7 @@ std::expected<std::shared_ptr<DSLResources>,std::string> DSLManager::loadDSLInte
 				auto* reqCtx{ stmt->requireStmt() };
 				std::string keyword{ reqCtx->ID()->getText() };
 				data->keywords.push_back(keyword);
+				data->intentSlots[intentName].insert(keyword);
 			}
 			else if (stmt->callStmt()) {
 				auto* callCtx{ stmt->callStmt() };
@@ -108,6 +115,8 @@ std::expected<std::shared_ptr<DSLResources>,std::string> DSLManager::loadDSLInte
 			}
 		}
 	}
+
+	data->version = dsl_version_counter++;
 
 	return data;
 }
@@ -128,4 +137,11 @@ std::expected<void,std::string> DSLManager::initOrReloadDSL(const std::string& s
 std::shared_ptr<DSLResources> DSLManager::loadDSLPtr()
 {
 	return dsl_ptr.load();
+}
+
+bool DSLResources::hasSlot(const std::string& intent, const std::string& slot)const
+{
+	auto it = intentSlots.find(intent);
+	if (it == intentSlots.end()) return false;
+	return it->second.contains(slot);
 }

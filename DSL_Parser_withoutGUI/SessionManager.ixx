@@ -10,12 +10,13 @@ export struct UserSession {
 	Context ctx;
 	std::string lastTimeIntent;
 	std::set<std::string> missingSlot;
+	size_t currentDslVersion{ 0 };
 };
 
 export class SessionManager
 {
 public:
-	SessionManager():sessions(drogon::app().getLoop(),60.0*10,60.0){ }
+	SessionManager():sessions(drogon::app().getLoop(),1.0,3,60){ }
 	std::shared_ptr<UserSession> getOrCreateUserSession(const std::string & userId);
 private:
 	drogon::CacheMap<std::string, std::shared_ptr<UserSession>> sessions;
@@ -36,7 +37,8 @@ std::shared_ptr<UserSession> SessionManager::getOrCreateUserSession(const std::s
 		session = std::make_shared<UserSession>();
 		session->ctx.add("user_id", userId);
 
-		sessions.insert(userId, session);
+		sessions.insert(userId, session,600);
 	}
 	return session;
 }
+

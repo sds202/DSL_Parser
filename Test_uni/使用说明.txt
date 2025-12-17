@@ -1,0 +1,9 @@
+pytest tests/
+
+pytest tests/test_chat_func.py
+
+pytest -k "test_03"
+# 或者
+pytest tests/test_chat_func.py::test_03_long_intent_flow
+
+pytest -x
