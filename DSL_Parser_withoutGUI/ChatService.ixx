@@ -34,6 +34,8 @@ drogon::Task<std::string> ChatService::handleInput(std::string userId, std::stri
 	if (!l_dsl_ptr)
 		co_return "系统正在初始化，请稍后...";
 
+	std::string tipReloadDSL;
+
 	//获取用户上下文
 	//读锁和写锁；提前拷贝NLU需要的数据
 	std::shared_ptr<UserSession> session{ sessionManager.getOrCreateUserSession(userId)};
@@ -43,8 +45,11 @@ drogon::Task<std::string> ChatService::handleInput(std::string userId, std::stri
 	{
 		std::lock_guard<std::mutex> userLock(session->mtx);
 
+		LOG_DEBUG << "v" << session->currentDslVersion << " -> v" << l_dsl_ptr->version;
+
 		if (session->currentDslVersion != l_dsl_ptr->version) {
 			session->currentDslVersion = l_dsl_ptr->version;
+			tipReloadDSL = "（检测到DSL更新，您的对话可能受影响）";
 
 			//需要做全面检查
 			if (!session->lastTimeIntent.empty()) {
@@ -85,32 +90,16 @@ drogon::Task<std::string> ChatService::handleInput(std::string userId, std::stri
 	}
 
 	//使用协程，LLM 识别
-	//先检测是否更新了dsl，如果是，需要刷新lastTimeIntent和slots
-	bool isCompatiable{ true };
-	auto intentIt = std::find(l_dsl_ptr->intents.begin(), l_dsl_ptr->intents.end(), lastIntentCopy);
-	if (intentIt != l_dsl_ptr->intents.end()) {
-		bool slotsCompatible = true;
-		for (const auto& slot : missingSlotCopy) {
-			if (!l_dsl_ptr->hasSlot(lastIntentCopy, slot)) {
-				slotsCompatible = false;
-				break;
-			}
-		}
+	
+	////先检测是否更新了dsl，如果是，需要刷新lastTimeIntent和slots
+	//auto it{ std::find(l_dsl_ptr->intents.begin(),l_dsl_ptr->intents.end(),lastIntentCopy) };
 
-		if (slotsCompatible) {
-			isCompatible = true;
-		}
-	}
-
-
-	auto it{ std::find(l_dsl_ptr->intents.begin(),l_dsl_ptr->intents.end(),lastIntentCopy) };
-
-	std::string tipReloadDSL;
-	if (it == l_dsl_ptr->intents.end()) {
-		lastIntentCopy = "";
-		missingSlotCopy.clear();
-		tipReloadDSL = "（检测到DSL更新，您的对话可能受影响）";
-	}
+	//std::string tipReloadDSL;
+	//if (it == l_dsl_ptr->intents.end()) {
+	//	lastIntentCopy = "";
+	//	missingSlotCopy.clear();
+	//	tipReloadDSL = "（检测到DSL更新，您的对话可能受影响）";
+	//}
 
 
 	//检查一下用户输入是不是过长
